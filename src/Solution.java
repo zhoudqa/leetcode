@@ -1239,6 +1239,171 @@ public class Solution {
         return head;
     }
 
+    //输入：path = "/a/./b/../../c/"
+    //输出："/c"
+    //TODO
+    public String simplifyPath(String path) {
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        Stack<Character> stack = new Stack<>();
+        for (int i = 0; i < path.length(); i++) {
+
+        }
+
+
+    }
+
+    //全排列 回溯算法
+    public List<List<Integer>> permute(int[] nums) {
+        int len = nums.length;
+        // 使用一个动态数组保存所有可能的全排列
+        List<List<Integer>> res = new ArrayList<>();
+        if (len == 0) {
+            return res;
+        }
+
+        boolean[] used = new boolean[len];
+        Deque<Integer> path = new ArrayDeque<>(len);
+
+        dfs(nums, len, 0, path, used, res);
+        return res;
+    }
+
+    private void dfs(int[] nums, int len, int depth,
+                     Deque<Integer> path, boolean[] used,
+                     List<List<Integer>> res) {
+        if (depth == len) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (!used[i]) {
+                path.addLast(nums[i]);
+                used[i] = true;
+
+                System.out.println("  递归之前 => " + path);
+                dfs(nums, len, depth + 1, path, used, res);
+
+                used[i] = false;
+                path.removeLast();
+                System.out.println("递归之后 => " + path);
+            }
+        }
+    }
+
+    //N皇后 回溯法
+    public List<List<String>> solveNQueens(int n) {
+        if (n == 0) {
+            return Collections.emptyList();
+        } else if (n == 1) {
+            return Collections.singletonList(Collections.singletonList("Q"));
+        }
+        List<List<String>> res = new ArrayList<>();
+        backtrack(new LinkedList<>(), 0, n, res);
+        return res;
+    }
+
+    private void backtrack(LinkedList<String> cur, int row, int n, List<List<String>> res) {
+        if (row == n) {
+            res.add(new ArrayList<>(cur));
+            return;
+        }
+        for (int i = 0; i < n; i++) {
+            if (isValid(cur, i, row, n)) {
+                //有效的话填写下一行
+                cur.offerLast(appendOneRow(i, n));
+                backtrack(cur, row + 1, n, res);
+                //状态恢复
+                cur.removeLast();
+            }
+        }
+    }
+
+    private boolean isValid(List<String> cur, int pos, int row, int n) {
+        //竖向重复|
+        for (int i = 0; i < row; i++) {
+            if (cur.get(i).charAt(pos) == 'Q') {
+                return false;
+            }
+        }
+        //斜向重复\
+        for (int i = row - 1, j = pos - 1; i >= 0 && j >= 0; i--, j--) {
+            if (cur.get(i).charAt(j) == 'Q') {
+                return false;
+            }
+        }
+        //斜向重复/
+        for (int i = row - 1, j = pos + 1; i >= 0 && j < n; i--, j++) {
+            if (cur.get(i).charAt(j) == 'Q') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public String appendOneRow(int pos, int n) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < pos; i++) {
+            sb.append(".");
+        }
+        sb.append("Q");
+        for (int i = pos + 1; i < n; i++) {
+            sb.append(".");
+        }
+        return sb.toString();
+    }
+
+    //编写一个高效的算法来判断 m x n 矩阵中，是否存在一个目标值
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int i = matrix[0].length - 1;
+        int j = 0;
+        while (i >= 0 && j < matrix.length) {
+            int delta = matrix[j][i] - target;
+            if (delta == 0) {
+                return true;
+            } else if (delta < 0) {
+                j++;
+            } else {
+                i--;
+            }
+        }
+        return false;
+    }
+
+    //请根据每日 气温 列表，重新生成一个列表。对应位置的输出为：要想观测到更高的气温，至少需要等待的天数。如果气温在这之后都不会升高，请在该位置用 0 来代替。
+    //
+    //例如，给定一个列表 temperatures = [73, 74, 75, 71, 69, 72, 76, 73]，你的输出应该是 [1, 1, 4, 2, 1, 1, 0, 0]。
+    public int[] dailyTemperatures(int[] T) {
+        int[] res = new int[T.length];
+        for (int i = 0; i < T.length; i++) {
+            res[i] = 0;
+            for (int j = i + 1; j < T.length; j++) {
+                if (T[j] > T[i]) {
+                    res[i] = j - i;
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+    //单调栈
+    public int[] dailyTemperaturesBest(int[] T) {
+        int[] res = new int[T.length];
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0; i < T.length; i++) {
+            int temp = T[i];
+            while (!stack.isEmpty() && temp > T[stack.peek()]) {
+                Integer preIndex = stack.pop();
+                res[preIndex] = i - preIndex;
+            }
+            stack.push(i);
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
 //        int size = 20;
 //        int[] a = new int[size];
