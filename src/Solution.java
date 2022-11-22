@@ -367,15 +367,15 @@ public class Solution {
         } else if (x < 0) {
             return false;
         } else {
-            return isPalindrome(String.valueOf(x));
+            return isPalindromeStr(String.valueOf(x));
         }
     }
 
-    private boolean isPalindrome(String positiveNum) {
+    private boolean isPalindromeStr(String positiveNum) {
         if (positiveNum.length() < 2) {
             return true;
         } else {
-            return positiveNum.charAt(0) == positiveNum.charAt(positiveNum.length() - 1) && isPalindrome(positiveNum.substring(1, positiveNum.length() - 1));
+            return positiveNum.charAt(0) == positiveNum.charAt(positiveNum.length() - 1) && isPalindromeStr(positiveNum.substring(1, positiveNum.length() - 1));
         }
 
     }
@@ -1250,8 +1250,7 @@ public class Solution {
         for (int i = 0; i < path.length(); i++) {
 
         }
-
-
+        return null;
     }
 
     //全排列 回溯算法
@@ -1402,6 +1401,97 @@ public class Solution {
             stack.push(i);
         }
         return res;
+    }
+
+    //给你 k 枚相同的鸡蛋，并可以使用一栋从第 1 层到第 n 层共有 n 层楼的建筑。
+    //已知存在楼层 f ，满足0 <= f <= n ，任何从 高于 f 的楼层落下的鸡蛋都会碎，从 f 楼层或比它低的楼层落下的鸡蛋都不会破
+    //每次操作，你可以取一枚没有碎的鸡蛋并把它从任一楼层 x 扔下（满足1 <= x <= n）。如果鸡蛋碎了，你就不能再次使用它。
+    // 如果某枚鸡蛋扔下后没有摔碎，则可以在之后的操作中 重复使用 这枚鸡蛋。
+    //请你计算并返回要确定 f 确切的值 的 最小操作次数 是多少？
+    public int superEggDrop(int k, int n) {
+        if (k == 1) {
+            return n;
+        } else if (n == 1) {
+            return 1;
+        } else {
+            return 1 + Math.min(superEggDrop(k - 1, n / 2 - 1), superEggDrop(k, n - n / 2));
+        }
+
+    }
+
+    public boolean isPalindrome(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (final char c : s.toCharArray()) {
+            if (isNumberOrAlpha(c)) {
+                sb.append(Character.toLowerCase(c));
+            }
+        }
+        if (sb.length() <= 1) {
+            return true;
+        }
+        final int length = sb.length();
+        final int mid = length / 2;
+        for (int i = 0; i < mid; i++) {
+            if (sb.charAt(i) != sb.charAt(length - 1 - i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isNumberOrAlpha(char c) {
+        return c >= 48 && c <= 57 || c >= 65 && c <= 90 || c >= 97 && c <= 122;
+    }
+
+
+    private final List<List<String>> res = new ArrayList<>();//结果集合
+    private final List<String> path = new ArrayList<>();//当前路径
+    boolean[][] isPalindrome;
+
+    public List<List<String>> partition(String s) {
+        final int len = s.length();
+        //定义dp为字符串s的子串i,j是否为回文串
+        //状态转译方程为：当j-i<=2时, dp(s,i,j)=s[i]==s[j]
+        //当j-i>2时，dp(s,i,j)=s[i]==s[j]&&dp[s,i+1,j-1]
+        isPalindrome = new boolean[len][len];
+        for (int i = 0; i < len; i++) {
+            for (int j = 0; j < len; j++) {
+                isPalindrome[i][j] = true;
+            }
+        }
+        for (int j = 1; j < len; j++) {
+            for (int i = 0; i < j; i++) {
+                boolean ijeq = s.charAt(i) == s.charAt(j);
+                if (j - i <= 2) {
+                    isPalindrome[i][j] = ijeq;
+                } else {
+                    isPalindrome[i][j] = ijeq && isPalindrome[i + 1][j - 1];
+                }
+            }
+        }
+        //深度优先搜索N叉树，根据是否回文过滤所有的分支
+        dfs(s, 0, len - 1);
+        return res;
+    }
+
+    private void dfs(String s, int start, int end) {
+        if (start > end) {
+            //满足条件的路径，path指针还要继续用，使用temp添加到结果集
+            List<String> temp = new ArrayList<>(path);
+            res.add(temp);
+            return;
+        }
+        for (int len = 1; len <= end - start + 1; len++) {
+            //i=start j=start+len-1
+            if (!isPalindrome[start][start + len - 1]) {
+                continue;
+            }
+            //左闭右开
+            path.add(s.substring(start, start + len));
+            dfs(s, start + len, end);
+            //深度优先，需要遍历完重新计划path
+            path.remove(path.size() - 1);
+        }
     }
 
     public static void main(String[] args) {
