@@ -1,9 +1,22 @@
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Stack;
 import java.util.function.Consumer;
 
 public class Solution {
 
     static class ListNode {
+
         int val;
         ListNode next;
 
@@ -13,6 +26,7 @@ public class Solution {
     }
 
     static class TreeNode {
+
         int val;
         TreeNode left;
         TreeNode right;
@@ -100,7 +114,9 @@ public class Solution {
                         res.add(Arrays.asList(nums[i], nums[j++], nums[k--]));
                     } else if (nums[j] + nums[k] < twoSum) {
                         j++;
-                    } else k--;
+                    } else {
+                        k--;
+                    }
                 }
             }
         }
@@ -150,7 +166,6 @@ public class Solution {
     //给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度。
     public int lengthOfLongestSubstring(String s) {
         Set<Integer> largestNoRepeatCharSet = new HashSet<>();
-
 
         String longestSubstring = longestSubstringFromIndex(s, 0);
         for (int i = 1; i < s.length(); i++) {
@@ -375,7 +390,8 @@ public class Solution {
         if (positiveNum.length() < 2) {
             return true;
         } else {
-            return positiveNum.charAt(0) == positiveNum.charAt(positiveNum.length() - 1) && isPalindromeStr(positiveNum.substring(1, positiveNum.length() - 1));
+            return positiveNum.charAt(0) == positiveNum.charAt(positiveNum.length() - 1) && isPalindromeStr(
+                    positiveNum.substring(1, positiveNum.length() - 1));
         }
 
     }
@@ -447,7 +463,9 @@ public class Solution {
     }
 
     private static <T extends Comparable<T>> void exch(T[] a, int i, int j) {
-        if (i == j) return;
+        if (i == j) {
+            return;
+        }
         T t = a[i];
         a[i] = a[j];
         a[j] = t;
@@ -455,12 +473,15 @@ public class Solution {
 
     private static <T extends Comparable<T>> boolean sorted(T[] a) {
         for (int i = 1; i < a.length; i++) {
-            if (less(a[i], a[i - 1])) return false;
+            if (less(a[i], a[i - 1])) {
+                return false;
+            }
         }
         return true;
     }
 
     private static class SimpleComparableVal implements Comparable<SimpleComparableVal> {
+
         int val;
 
         public SimpleComparableVal(int val) {
@@ -529,8 +550,11 @@ public class Solution {
         int j = mid + 1;
         int tIndex = 0;
         while (i <= mid && j <= hi) {
-            if (less(temp[i], temp[j])) temp[tIndex++] = a[i++];
-            else temp[tIndex++] = a[j++];
+            if (less(temp[i], temp[j])) {
+                temp[tIndex++] = a[i++];
+            } else {
+                temp[tIndex++] = a[j++];
+            }
         }
         while (i <= mid) {
             temp[tIndex++] = a[i++];
@@ -550,7 +574,9 @@ public class Solution {
     }
 
     public static <T extends Comparable<T>> void mergeSort(T[] a, T[] temp, int lo, int hi) {
-        if (hi <= lo) return;
+        if (hi <= lo) {
+            return;
+        }
         int mid = (hi + lo) / 2;
         mergeSort(a, temp, lo, mid);
         mergeSort(a, temp, mid + 1, hi);
@@ -561,8 +587,9 @@ public class Solution {
     public static void printTree(TreeNode root) {
 
         List<String> res = new ArrayList<>();
-        if (root != null)
+        if (root != null) {
             printTree(root, "", res);
+        }
         res.forEach(s -> System.out.println(reverse(s)));
 
     }
@@ -642,7 +669,8 @@ public class Solution {
         int len = s.length();
         while (i < len) {
             if (i + 1 < len) {
-                res += getValue(s.charAt(i)) < getValue(s.charAt(i + 1)) ? -getValue(s.charAt(i)) : getValue(s.charAt(i));
+                res += getValue(s.charAt(i)) < getValue(s.charAt(i + 1)) ? -getValue(s.charAt(i))
+                        : getValue(s.charAt(i));
             } else {
                 res += getValue(s.charAt(i));
             }
@@ -727,8 +755,9 @@ public class Solution {
 
         if (root.left == null && root.right == null) {
             return root.val == targetSum;
-        } else
+        } else {
             return hasPathSum(root.left, targetSum - root.val) || hasPathSum(root.right, targetSum - root.val);
+        }
 
     }
 
@@ -758,7 +787,9 @@ public class Solution {
             return sumNb(index.right, cur);
         } else if (index.right == null) {
             return sumNb(index.left, cur);
-        } else return sumNb(index.left, cur) + sumNb(index.right, cur);
+        } else {
+            return sumNb(index.left, cur) + sumNb(index.right, cur);
+        }
     }
 
     //找寻p q节点的公共最小祖先
@@ -785,8 +816,10 @@ public class Solution {
             return rootNode;
         }
         int rootInIndex = findIndexOf(inorder, preorder[0]);
-        rootNode.left = buildTree(Arrays.copyOfRange(preorder, 1, rootInIndex + 1), Arrays.copyOfRange(inorder, 0, rootInIndex));
-        rootNode.right = buildTree(Arrays.copyOfRange(preorder, rootInIndex + 1, preorder.length), Arrays.copyOfRange(inorder, rootInIndex + 1, inorder.length));
+        rootNode.left = buildTree(Arrays.copyOfRange(preorder, 1, rootInIndex + 1),
+                Arrays.copyOfRange(inorder, 0, rootInIndex));
+        rootNode.right = buildTree(Arrays.copyOfRange(preorder, rootInIndex + 1, preorder.length),
+                Arrays.copyOfRange(inorder, rootInIndex + 1, inorder.length));
         return rootNode;
     }
 
@@ -1270,8 +1303,8 @@ public class Solution {
     }
 
     private void dfs(int[] nums, int len, int depth,
-                     Deque<Integer> path, boolean[] used,
-                     List<List<Integer>> res) {
+            Deque<Integer> path, boolean[] used,
+            List<List<Integer>> res) {
         if (depth == len) {
             res.add(new ArrayList<>(path));
             return;
@@ -1494,7 +1527,59 @@ public class Solution {
         }
     }
 
+    //给你一个字符串 s 和一个字符串列表 wordDict 作为字典。请你判断是否可以利用字典中出现的单词拼接出 s 。
+    //注意：不要求字典中出现的单词全部都使用，并且字典中的单词可以重复使用。
+    //wordDict 中的所有字符串 互不相同
+    //1 <= s.length <= 300
+    //1 <= wordDict.length <= 1000
+    //1 <= wordDict[i].length <= 20
+    //s 和 wordDict[i] 仅有小写英文字母组成
+    public boolean wordBreak(String s, List<String> wordDict) {
+        //dp(s,i)为s中的前i个字母可以由wordDict拼接成功
+        //状态转移方程为dp(s,i)=dp(s,j)&&check(s[j...i-1]，check函数为子串s[j...i-1]在字典中
+        int maxLen = 0;
+        for (final String s1 : wordDict) {
+            maxLen = Math.max(maxLen, s1.length());
+        }
+        // 1<=i<=s.len
+        boolean[] dp = new boolean[s.length() + 1];
+        dp[0] = true;
+        Set<String> wordSet = new HashSet<>(wordDict);
+        for (int i = 1; i <= s.length(); i++) {
+            for (int j = 0; j < i; j++) {
+                //j分割点可以让s的前i个字母拼接成功，则直接返回成功
+                dp[i] = dp[j] && check(s, j, i, wordSet, maxLen);
+                if (dp[i]) {
+                    break;
+                }
+            }
+        }
+        return dp[s.length()];
+    }
+
+    private boolean check(String s, int m, int n, Set<String> wordDict, int maxLen) {
+        if (n - m > maxLen) {
+            return false;
+        } else {
+            return wordDict.contains(s.substring(m, n));
+        }
+    }
+
+    //编写一个函数，其作用是将输入的字符串反转过来。输入字符串以字符数组 s 的形式给出。
+    //不要给另外的数组分配额外的空间，你必须原地修改输入数组、使用 O(1) 的额外空间解决这一问题。
+    public void reverseString(char[] s) {
+        for (int i = 0, j = s.length - 1; i < j; i++, j--) {
+            s[i] ^= s[j];
+            s[j] ^= s[i];
+            s[i] ^= s[j];
+        }
+    }
+
     public static void main(String[] args) {
+
+        final Solution solution = new Solution();
+//        solution.wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "catsan"));
+        solution.reverseString(new char[]{'h', 'e', 'l', 'l', 'o', 'a'});
 //        int size = 20;
 //        int[] a = new int[size];
 //        Random random = new Random();
@@ -1553,7 +1638,8 @@ public class Solution {
         long start = System.currentTimeMillis();
         SimpleComparableVal[] a = toComparableArray(testArray);
         sortAlgorithm.accept(a);
-        System.out.println(sortAlgorithm.toString() + " cost " + (System.currentTimeMillis() - start) + "ms  " + sorted(a));
+        System.out.println(
+                sortAlgorithm.toString() + " cost " + (System.currentTimeMillis() - start) + "ms  " + sorted(a));
     }
 }
 
