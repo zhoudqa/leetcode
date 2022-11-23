@@ -2,12 +2,14 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
@@ -1565,6 +1567,72 @@ public class Solution {
         }
     }
 
+    //给定一个字符串 s 和一个字符串字典wordDict，在字符串s中增加空格来构建一个句子，使得句子中所有的单词都在词典中。
+    // 以任意顺序 返回所有这些可能的句子。
+    //
+    //1 <= s.length <= 20
+    //1 <= wordDict.length <= 1000
+    //1 <= wordDict[i].length <= 10
+    //s和wordDict[i]仅有小写英文字母组成
+    //wordDict中所有字符串都 不同
+    public List<String> wordBreak2(String s, List<String> wordDict) {
+        //dp(s,i)为s中的前i个字母可以由wordDict拼接成功的所有句子
+        //状态转移方程为dp(s,i)=dp(s,j)&&check(s[j...i-1]，check函数为子串s[j...i-1]在字典中
+        Set<String> wordDictSet = new HashSet<>(wordDict);
+        int maxLen = wordDictSet.stream().mapToInt(String::length).max().orElse(0);
+        Map<Integer, List<String>> dp = new HashMap<>();
+        dp.put(0, new ArrayList<>());
+        for (int i = 1; i <= s.length(); i++) {
+            for (int j = 0; j < i; j++) {
+                if (check(s, j, i, wordDictSet, maxLen) && dp.get(j) != null) {
+                    String suffix = s.substring(j, i);
+                    dp.computeIfAbsent(i, k -> new ArrayList<>());
+                    final List<String> iWords = dp.get(i);
+                    if (dp.get(j).isEmpty()) {
+                        iWords.add(suffix);
+                    } else {
+                        dp.get(j).forEach(prefix -> iWords.add(prefix + " " + suffix));
+                    }
+                }
+            }
+
+        }
+        return Optional.ofNullable(dp.get(s.length())).orElse(Collections.emptyList());
+    }
+
+    //编写一个函数来查找字符串数组中的最长公共前缀。
+    //如果不存在公共前缀，返回空字符串 ""。
+    public String longestCommonPrefix(String[] strs) {
+        if (strs.length == 0) {
+            return "";
+        } else if (strs.length == 1) {
+            return strs[0];
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            boolean hasCommonPrefix = true;
+            int i = 0;
+            final String minLenStr = Arrays.stream(strs).min(Comparator.comparing(String::length))
+                    .orElse(strs[0]);
+            while (hasCommonPrefix) {
+                if (minLenStr.length() <= i) {
+                    break;
+                }
+                char c = minLenStr.charAt(i);
+                for (final String str : strs) {
+                    if (c != str.charAt(i)) {
+                        hasCommonPrefix = false;
+                        break;
+                    }
+                }
+                i++;
+                if (hasCommonPrefix) {
+                    sb.append(c);
+                }
+            }
+            return sb.toString();
+        }
+    }
+
     //编写一个函数，其作用是将输入的字符串反转过来。输入字符串以字符数组 s 的形式给出。
     //不要给另外的数组分配额外的空间，你必须原地修改输入数组、使用 O(1) 的额外空间解决这一问题。
     public void reverseString(char[] s) {
@@ -1578,8 +1646,9 @@ public class Solution {
     public static void main(String[] args) {
 
         final Solution solution = new Solution();
-//        solution.wordBreak("catsandog", Arrays.asList("cats", "dog", "sand", "and", "catsan"));
-        solution.reverseString(new char[]{'h', 'e', 'l', 'l', 'o', 'a'});
+//        solution.wordBreak2("catsandog", Arrays.asList("cats", "dog", "sand", "and", "catsang"));
+//        solution.reverseString(new char[]{'h', 'e', 'l', 'l', 'o', 'a'});
+        solution.longestCommonPrefix(new String[]{"reflower","flow","flight"});
 //        int size = 20;
 //        int[] a = new int[size];
 //        Random random = new Random();
