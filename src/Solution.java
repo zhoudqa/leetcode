@@ -1305,8 +1305,8 @@ public class Solution {
     }
 
     private void dfs(int[] nums, int len, int depth,
-            Deque<Integer> path, boolean[] used,
-            List<List<Integer>> res) {
+                     Deque<Integer> path, boolean[] used,
+                     List<List<Integer>> res) {
         if (depth == len) {
             res.add(new ArrayList<>(path));
             return;
@@ -1667,26 +1667,25 @@ public class Solution {
 
     static class Trie {
 
-        private final Trie[] children;
+        private final Map<Character, Trie> children;
         private boolean isEnd;
+        private String word;
 
         public Trie() {
-            children = new Trie[26];
+            children = new HashMap<>();
             isEnd = false;
+            word = null;
         }
 
         public void insert(String word) {
-            //构建26叉树
             Trie node = this;
             for (int i = 0; i < word.length(); i++) {
                 char ch = word.charAt(i);
-                int index = ch - 'a';
-                if (node.children[index] == null) {
-                    node.children[index] = new Trie();
-                }
-                node = node.children[index];
+                node.children.putIfAbsent(ch, new Trie());
+                node = node.children.get(ch);
             }
             node.isEnd = true;
+            node.word = word;
         }
 
         public boolean search(String word) {
@@ -1702,25 +1701,12 @@ public class Solution {
             Trie node = this;
             for (int i = 0; i < prefix.length(); i++) {
                 char ch = prefix.charAt(i);
-                int index = ch - 'a';
-                if (node.children[index] == null) {
+                if (!node.children.containsKey(ch)) {
                     return null;
                 }
-                node = node.children[index];
+                node = node.children.get(ch);
             }
             return node;
-        }
-    }
-
-
-    static class Trie2Node {
-
-        public final Trie2Node[] neighbors;
-        public final char c;
-
-        Trie2Node(char c) {
-            this.c = c;
-            neighbors = new Trie2Node[4];//四个相邻的节点
         }
     }
 
@@ -1783,6 +1769,43 @@ public class Solution {
         return found;
     }
 
+    //代表4个方向
+    private static final int[][] DIRECTS = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
+    public List<String> findWordsBest(char[][] board, String[] words) {
+        Trie trie = new Trie();
+        for (String word : words) {
+            trie.insert(word);
+        }
+        Set<String> result = new HashSet<>();
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                dfs(board, trie, i, j, result);
+            }
+        }
+        return new ArrayList<>(result);
+    }
+
+    private void dfs(char[][] board, Trie trie, int i, int j, Set<String> res) {
+        char ch = board[i][j];
+        if (!trie.children.containsKey(ch)) {
+            //没有前缀
+            return;
+        }
+        Trie next = trie.children.get(ch);
+        if (next.word != null) {
+            res.add(next.word);
+        }
+        board[i][j] = '#';
+        for (int[] direct : DIRECTS) {
+            int i1 = i + direct[0], j1 = j + direct[1];
+            if (i1 >= 0 && i1 < board.length && j1 >= 0 && j1 < board[0].length) {
+                dfs(board, next, i1, j1, res);
+            }
+        }
+        board[i][j] = ch;
+    }
+
 
     public static void main(String[] args) {
 
@@ -1798,7 +1821,7 @@ public class Solution {
 //        trie.startsWith("app"); // 返回 True
 //        trie.insert("app");
 //        trie.search("app");     // 返回 True
-        solution.findWords(
+        solution.findWordsBest(
                 new char[][]{{'a', 'b', 'c'}, {'a', 'e', 'd'}, {'a', 'f', 'g'}},
                 new String[]{"gfedcbaaa"});
 //        int size = 20;
