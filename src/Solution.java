@@ -1667,22 +1667,27 @@ public class Solution {
 
     static class Trie {
 
-        private final Map<Character, Trie> children;
-        private boolean isEnd;
-        private String word;
+        final Trie[] children;
+        boolean isEnd;
+        String word;
 
         public Trie() {
-            children = new HashMap<>();
+            children = new Trie[26];
             isEnd = false;
             word = null;
         }
 
         public void insert(String word) {
             Trie node = this;
+            //构建26叉树
             for (int i = 0; i < word.length(); i++) {
                 char ch = word.charAt(i);
-                node.children.putIfAbsent(ch, new Trie());
-                node = node.children.get(ch);
+                int idx = ch - 'a';
+                if (node.children[idx] == null) {
+
+                    node.children[idx] = new Trie();
+                }
+                node = node.children[idx];
             }
             node.isEnd = true;
             node.word = word;
@@ -1701,10 +1706,11 @@ public class Solution {
             Trie node = this;
             for (int i = 0; i < prefix.length(); i++) {
                 char ch = prefix.charAt(i);
-                if (!node.children.containsKey(ch)) {
+                int idx = ch - 'a';
+                if (node.children[idx] == null) {
                     return null;
                 }
-                node = node.children.get(ch);
+                node = node.children[idx];
             }
             return node;
         }
@@ -1788,19 +1794,23 @@ public class Solution {
 
     private void dfs(char[][] board, Trie trie, int i, int j, Set<String> res) {
         char ch = board[i][j];
-        if (!trie.children.containsKey(ch)) {
-            //没有前缀
+        if (ch == '#') {
             return;
         }
-        Trie next = trie.children.get(ch);
-        if (next.word != null) {
-            res.add(next.word);
+        int idx = ch - 'a';
+        Trie child = trie.children[idx];
+        if (child == null) {
+            //无此接下来的字符
+            return;
+        }
+        if (child.isEnd) {
+            res.add(child.word);
         }
         board[i][j] = '#';
         for (int[] direct : DIRECTS) {
             int i1 = i + direct[0], j1 = j + direct[1];
             if (i1 >= 0 && i1 < board.length && j1 >= 0 && j1 < board[0].length) {
-                dfs(board, next, i1, j1, res);
+                dfs(board, child, i1, j1, res);
             }
         }
         board[i][j] = ch;
@@ -1823,7 +1833,7 @@ public class Solution {
 //        trie.search("app");     // 返回 True
         solution.findWordsBest(
                 new char[][]{{'a', 'b', 'c'}, {'a', 'e', 'd'}, {'a', 'f', 'g'}},
-                new String[]{"gfedcbaaa"});
+                new String[]{"gfedcbaaa", "asdasdwgfdfda", "lkhjlkdnskajgd"});
 //        int size = 20;
 //        int[] a = new int[size];
 //        Random random = new Random();
