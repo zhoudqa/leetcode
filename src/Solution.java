@@ -1643,12 +1643,164 @@ public class Solution {
         }
     }
 
+    //    实现前缀树
+    static class Trie1 {
+
+        private final Set<String> words = new HashSet<>(10);
+
+        public Trie1() {
+
+        }
+
+        public void insert(String word) {
+            words.add(word);
+        }
+
+        public boolean search(String word) {
+            return words.contains(word);
+        }
+
+        public boolean startsWith(String prefix) {
+            return words.stream().anyMatch(word -> word.startsWith(prefix));
+        }
+    }
+
+    static class Trie {
+
+        private final Trie[] children;
+        private boolean isEnd;
+
+        public Trie() {
+            children = new Trie[26];
+            isEnd = false;
+        }
+
+        public void insert(String word) {
+            //构建26叉树
+            Trie node = this;
+            for (int i = 0; i < word.length(); i++) {
+                char ch = word.charAt(i);
+                int index = ch - 'a';
+                if (node.children[index] == null) {
+                    node.children[index] = new Trie();
+                }
+                node = node.children[index];
+            }
+            node.isEnd = true;
+        }
+
+        public boolean search(String word) {
+            Trie node = searchPrefix(word);
+            return node != null && node.isEnd;
+        }
+
+        public boolean startsWith(String prefix) {
+            return searchPrefix(prefix) != null;
+        }
+
+        private Trie searchPrefix(String prefix) {
+            Trie node = this;
+            for (int i = 0; i < prefix.length(); i++) {
+                char ch = prefix.charAt(i);
+                int index = ch - 'a';
+                if (node.children[index] == null) {
+                    return null;
+                }
+                node = node.children[index];
+            }
+            return node;
+        }
+    }
+
+
+    static class Trie2Node {
+
+        public final Trie2Node[] neighbors;
+        public final char c;
+
+        Trie2Node(char c) {
+            this.c = c;
+            neighbors = new Trie2Node[4];//四个相邻的节点
+        }
+    }
+
+    //给定一个m*n二维字符网格board和一个单词（字符串）列表 words，返回所有二维网格上的单词。
+    //
+    //单词必须按照字母顺序，通过 相邻的单元格 内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母在一个单词中不允许被重复使用。
+    public List<String> findWords(char[][] board, String[] words) {
+        if (board.length == 0 || board[0].length == 0) {
+            return new ArrayList<>();
+        }
+        Map<String, Boolean> cache = new HashMap<>();
+        Set<String> result = new HashSet<>();
+        for (final String word : words) {
+            for (int i = 0; i < board[0].length; i++) {
+                for (int j = 0; j < board.length; j++) {
+                    Set<Integer> path = new HashSet<>();
+                    if (findWord(board, i, j, word, cache, path)) {
+                        result.add(word);
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(result);
+    }
+
+    //寻找网格中位置为v,h的点开头，是否可以拼接成word
+    private boolean findWord(char[][] board, int v, int h, String word, Map<String, Boolean> cache, Set<Integer> path) {
+        if (v >= board[0].length || h >= board.length || v < 0 || h < 0) {
+            //越界
+            return false;
+        }
+        String hash = v * 10 + h + word;
+        if (cache.containsKey(hash)) {
+            return cache.get(hash);
+        }
+        boolean found;
+        if (word.length() == 1) {
+            //最后一个字母
+            found = board[h][v] == word.charAt(0);
+        } else {
+            //向四周查找
+            final String substring = word.substring(1);
+            found = board[h][v] == word.charAt(0) && (
+                    findWord(board, v - 1, h, substring, cache, path)
+                            || findWord(board, v + 1, h, substring, cache, path)
+                            || findWord(board, v, h - 1, substring, cache, path)
+                            || findWord(board, v, h + 1, substring, cache, path)
+            );
+        }
+        if (found) {
+            //保存路径
+            if (path.contains(v * 10 + h)) {
+                found = false;
+            } else {
+                path.add(v * 10 + h);
+            }
+
+        }
+        cache.put(hash, found);
+        return found;
+    }
+
+
     public static void main(String[] args) {
 
         final Solution solution = new Solution();
 //        solution.wordBreak2("catsandog", Arrays.asList("cats", "dog", "sand", "and", "catsang"));
 //        solution.reverseString(new char[]{'h', 'e', 'l', 'l', 'o', 'a'});
-        solution.longestCommonPrefix(new String[]{"reflower","flow","flight"});
+//        solution.longestCommonPrefix(new String[]{"reflower","flow","flight"});
+
+//        Trie trie = new Trie();
+//        trie.insert("apple");
+//        trie.search("apple");   // 返回 True
+//        trie.search("app");     // 返回 False
+//        trie.startsWith("app"); // 返回 True
+//        trie.insert("app");
+//        trie.search("app");     // 返回 True
+        solution.findWords(
+                new char[][]{{'a', 'b', 'c'}, {'a', 'e', 'd'}, {'a', 'f', 'g'}},
+                new String[]{"gfedcbaaa"});
 //        int size = 20;
 //        int[] a = new int[size];
 //        Random random = new Random();
