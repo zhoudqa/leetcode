@@ -1305,8 +1305,8 @@ public class Solution {
     }
 
     private void dfs(int[] nums, int len, int depth,
-                     Deque<Integer> path, boolean[] used,
-                     List<List<Integer>> res) {
+            Deque<Integer> path, boolean[] used,
+            List<List<Integer>> res) {
         if (depth == len) {
             res.add(new ArrayList<>(path));
             return;
@@ -1816,6 +1816,107 @@ public class Solution {
         board[i][j] = ch;
     }
 
+    //对于一个给定的字符串 S ，如果另一个单词能够通过将一些字母组扩张从而使其和 S 相同，我们将这个单词定义为可扩张的（stretchy）。
+    // 扩张操作定义如下：选择一个字母组（包含字母 c ），然后往其中添加相同的字母 c 使其长度达到 3 或以上。
+    public int expressiveWords(String s, String[] words) {
+        List<String> sParts = getParts(s);
+        int res = 0;
+        for (final String word : words) {
+            if (word.length() <= s.length()) {
+                List<String> wordParts = getParts(word);
+                if (wordParts.size() == sParts.size()) {
+                    boolean match = true;
+                    for (int i = 0; i < wordParts.size(); i++) {
+                        final String wordPart = wordParts.get(i);
+                        final String sPart = sParts.get(i);
+                        final boolean stretchy = stretchy(wordPart, sPart);
+                        match &= stretchy;
+                        if (!match) {
+                            break;
+                        }
+                    }
+                    if (match) {
+                        res++;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    private boolean stretchy(String wordPart, String sPart) {
+        //字母不一样
+        if (wordPart.charAt(0) != sPart.charAt(0)) {
+            return false;
+        }
+        //长度一致
+        if (wordPart.length() == sPart.length()) {
+            return true;
+        }
+        //没有扩张到3个以上
+        if (wordPart.length() > sPart.length() || sPart.length() < 3) {
+            return false;
+        }
+        return true;
+    }
+
+    private List<String> getParts(String s) {
+        List<String> parts = new ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            cur.append(s.charAt(i));
+            if (i == s.length() - 1) {
+                parts.add(cur.toString());
+
+            } else if (s.charAt(i) != s.charAt(i + 1)) {
+                parts.add(cur.toString());
+                cur = new StringBuilder();
+            }
+        }
+        return parts;
+    }
+
+    public int expressiveWordsBest(String s, String[] words) {
+        int res = 0;
+        for (final String origin : words) {
+            if (stretchyWords(origin, s)) {
+                res++;
+            }
+        }
+        return res;
+    }
+
+    //双指针判断
+    private boolean stretchyWords(String origin, String expanded) {
+        int i = 0, j = 0;
+        while (i < origin.length() && j < expanded.length()) {
+            final char wordChar = origin.charAt(i);
+            final char sChar = expanded.charAt(j);
+            //字母不一致
+            if (wordChar != sChar) {
+                return false;
+            }
+            int icount = 1;
+            while (++i < origin.length() && origin.charAt(i) == wordChar) {
+                icount++;
+            }
+            int jcount = 1;
+            while (++j < expanded.length() && expanded.charAt(j) == sChar) {
+                jcount++;
+            }
+            //word长度更长
+            if (icount > jcount) {
+                return false;
+            }
+            //长度不一致且s未扩张到3个字母
+            if (icount != jcount && jcount < 3) {
+                return false;
+            }
+
+        }
+        return i == origin.length() && j == expanded.length();
+    }
+
 
     public static void main(String[] args) {
 
@@ -1831,9 +1932,12 @@ public class Solution {
 //        trie.startsWith("app"); // 返回 True
 //        trie.insert("app");
 //        trie.search("app");     // 返回 True
-        solution.findWordsBest(
-                new char[][]{{'a', 'b', 'c'}, {'a', 'e', 'd'}, {'a', 'f', 'g'}},
-                new String[]{"gfedcbaaa", "asdasdwgfdfda", "lkhjlkdnskajgd"});
+//        solution.findWordsBest(
+//                new char[][]{{'a', 'b', 'c'}, {'a', 'e', 'd'}, {'a', 'f', 'g'}},
+//                new String[]{"gfedcbaaa", "asdasdwgfdfda", "lkhjlkdnskajgd"});
+        final int count = solution.expressiveWordsBest("dddiiiinnssssssoooo",
+                new String[]{"dinnssoo", "ddinso", "ddiinnso", "ddiinnssoo", "ddiinso", "dinsoo", "ddiinsso", "dinssoo",
+                        "dinso"});
 //        int size = 20;
 //        int[] a = new int[size];
 //        Random random = new Random();
@@ -1860,12 +1964,12 @@ public class Solution {
 //        solution.dfsInorderWithoutRecursion(root);
 //        System.out.println();
 //        solution.dfsPostorderWithoutRecursion(root);
-        ListNode a = fromArray(new int[]{1, 4, 5});
-        ListNode b = fromArray(new int[]{1, 3, 4});
-        ListNode c = fromArray(new int[]{2, 6});
-        ListNode d = fromArray(new int[]{3, 7});
+//        ListNode a = fromArray(new int[]{1, 4, 5});
+//        ListNode b = fromArray(new int[]{1, 3, 4});
+//        ListNode c = fromArray(new int[]{2, 6});
+//        ListNode d = fromArray(new int[]{3, 7});
 //        ListNode mergeTwoListNodes = new Solution().mergeTwoListNodes(a, b);
-        ListNode res = new Solution().mergeKLists(new ListNode[]{a, b, c, d});
+//        ListNode res = new Solution().mergeKLists(new ListNode[]{a, b, c, d});
     }
 
     private static TreeNode getTreeNode() {
