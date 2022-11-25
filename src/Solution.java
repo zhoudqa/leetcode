@@ -1917,6 +1917,65 @@ public class Solution {
         return i == origin.length() && j == expanded.length();
     }
 
+    //给定两个字符串 s 和 t ，编写一个函数来判断 t 是否是 s 的字母异位词。
+    //注意：若s 和 t中每个字符出现的次数都相同，则称s 和 t互为字母异位词。
+    public boolean isAnagram(String s, String t) {
+        int[] count = new int[26];
+        for (final char c : s.toCharArray()) {
+            count[c - 'a']++;
+        }
+        for (final char c : t.toCharArray()) {
+            count[c - 'a']--;
+        }
+        for (final int i : count) {
+            if (i != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //给定一个字符串 s ，找到 它的第一个不重复的字符，并返回它的索引 。如果不存在，则返回 -1 。
+    //s只包含小写字母
+    public int firstUniqChar(String s) {
+        //res保存不重复字符的index
+        int[] res = new int[26];
+        for (int i = 0; i < 26; i++) {
+            //index-1标记未出现
+            res[i] = -1;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            int idx = s.charAt(i) - 'a';
+            if (res[idx] == -1) {
+                //index标记字符的位置
+                res[idx] = i;
+            } else {
+                //index-2标记重复出现
+                res[idx] = -2;
+            }
+        }
+        int first = Integer.MAX_VALUE;
+        for (final int index : res) {
+            if (index >= 0) {
+                first = Math.min(first, index);
+            }
+        }
+        return first == Integer.MAX_VALUE ? -1 : first;
+    }
+
+    public int firstUniqChar1(String s) {
+        int[] count = new int[26];
+        for (final char c : s.toCharArray()) {
+            count[c - 'a']++;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            if (count[s.charAt(i) - 'a'] == 1) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 
     public static void main(String[] args) {
 
@@ -1935,9 +1994,13 @@ public class Solution {
 //        solution.findWordsBest(
 //                new char[][]{{'a', 'b', 'c'}, {'a', 'e', 'd'}, {'a', 'f', 'g'}},
 //                new String[]{"gfedcbaaa", "asdasdwgfdfda", "lkhjlkdnskajgd"});
-        final int count = solution.expressiveWordsBest("dddiiiinnssssssoooo",
-                new String[]{"dinnssoo", "ddinso", "ddiinnso", "ddiinnssoo", "ddiinso", "dinsoo", "ddiinsso", "dinssoo",
-                        "dinso"});
+//        final int count = solution.expressiveWordsBest("dddiiiinnssssssoooo",
+//                new String[]{"dinnssoo", "ddinso", "ddiinnso", "ddiinnssoo", "ddiinso", "dinsoo", "ddiinsso", "dinssoo",
+//                        "dinso"});
+//        final boolean anagram = solution.isAnagram("anagram", "nagaram");
+        final int idx = solution.firstUniqChar(
+                "itwqbtcdprfsuprkrjkausiterybzncbmdvkgljxuekizvaivszowqtmrttiihervpncztuoljftlxybpgwnjb");
+        System.out.println();
 //        int size = 20;
 //        int[] a = new int[size];
 //        Random random = new Random();
