@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
@@ -1974,6 +1975,63 @@ public class Solution {
             }
         }
         return -1;
+    }
+
+    // 细分图中的可到达节点
+    // https://leetcode.cn/problems/reachable-nodes-in-subdivided-graph/description/
+    public int reachableNodes(int[][] edges, int maxMoves, int n) {
+        List<int[]>[] adjList = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            adjList[i] = new ArrayList<>();
+        }
+        //构造邻接表
+        for (final int[] edge : edges) {
+            int u = edge[0], v = edge[1], nodes = edge[2];
+            adjList[u].add(new int[]{v, nodes});
+            adjList[v].add(new int[]{u, nodes});//无向图
+        }
+        int result = 0;
+        Map<Integer, Integer> midReachable = new HashMap<>();
+        //Dijkstra--优先队列
+        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a[1]));
+        //Dijkstra--已访问记录
+        boolean[] visited = new boolean[n];
+        //Dijkstra--0节点weight为0
+        pq.offer(new int[]{0, 0});
+        while (!pq.isEmpty() && pq.peek()[1] <= maxMoves) {
+            final int[] poll = pq.poll();
+            int u = poll[0], nodesU = poll[1];
+            //Dijkstra--已访问记录判断及更新
+            if (visited[u]) {
+                continue;
+            }
+            visited[u] = true;
+            result++;
+            for (final int[] adj : adjList[u]) {
+                int v = adj[0], nodeuv = adj[1];
+                //邻接表维护的是中间的节点数量，所以实际距离应该加1
+                int nodesV = nodesU + nodeuv + 1;
+                if (nodesV <= maxMoves && !visited[v]) {
+                    //Dijkstra--新增可达边
+                    pq.offer(new int[]{v, nodesV});
+                }
+                //u节点可达，无论v是否可达，uv之间的部分节点肯定可达
+                // 如果maxMoves-nodesU>wuv那么所有wuv全部可达，否则可达的只有maxMoves-nodesU
+                midReachable.put(encode(u, v, n), Math.min(nodeuv, maxMoves - nodesU));
+            }
+        }
+        for (final int[] edge : edges) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            final int mid = midReachable.getOrDefault(encode(u, v, n), 0)
+                    + midReachable.getOrDefault(encode(v, u, n), 0);
+            //uv向和vu向可能重复可能会少，因此和w取最小值
+            result += Math.min(w, mid);
+        }
+        return result;
+    }
+
+    private int encode(int u, int v, int n) {
+        return u * n + v;
     }
 
 
