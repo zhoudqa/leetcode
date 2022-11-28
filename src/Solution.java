@@ -956,8 +956,8 @@ public class Solution {
             count[i] = 1;
             len[i] = 1;
             for (int j = 0; j < i; j++) {
-                if (envelopes[i][0] > envelopes[j][0] && envelopes[i][1] > envelopes[j][1] ||
-                        envelopes[i][0] < envelopes[j][0] && envelopes[i][1] < envelopes[j][1]) {
+                if (envelopes[i][0] > envelopes[j][0] && envelopes[i][1] > envelopes[j][1]
+                        || envelopes[i][0] < envelopes[j][0] && envelopes[i][1] < envelopes[j][1]) {
                     if (len[i] < len[j] + 1) {
                         //长度可以增长
                         len[i] = len[j] + 1;
@@ -1305,9 +1305,7 @@ public class Solution {
         return res;
     }
 
-    private void dfs(int[] nums, int len, int depth,
-            Deque<Integer> path, boolean[] used,
-            List<List<Integer>> res) {
+    private void dfs(int[] nums, int len, int depth, Deque<Integer> path, boolean[] used, List<List<Integer>> res) {
         if (depth == len) {
             res.add(new ArrayList<>(path));
             return;
@@ -1612,8 +1610,7 @@ public class Solution {
             final StringBuilder sb = new StringBuilder();
             boolean hasCommonPrefix = true;
             int i = 0;
-            final String minLenStr = Arrays.stream(strs).min(Comparator.comparing(String::length))
-                    .orElse(strs[0]);
+            final String minLenStr = Arrays.stream(strs).min(Comparator.comparing(String::length)).orElse(strs[0]);
             while (hasCommonPrefix) {
                 if (minLenStr.length() <= i) {
                     break;
@@ -1756,12 +1753,9 @@ public class Solution {
         } else {
             //向四周查找
             final String substring = word.substring(1);
-            found = board[h][v] == word.charAt(0) && (
-                    findWord(board, v - 1, h, substring, cache, path)
-                            || findWord(board, v + 1, h, substring, cache, path)
-                            || findWord(board, v, h - 1, substring, cache, path)
-                            || findWord(board, v, h + 1, substring, cache, path)
-            );
+            found = board[h][v] == word.charAt(0) && (findWord(board, v - 1, h, substring, cache, path) || findWord(
+                    board, v + 1, h, substring, cache, path) || findWord(board, v, h - 1, substring, cache, path)
+                    || findWord(board, v, h + 1, substring, cache, path));
         }
         if (found) {
             //保存路径
@@ -2022,8 +2016,8 @@ public class Solution {
         }
         for (final int[] edge : edges) {
             int u = edge[0], v = edge[1], w = edge[2];
-            final int mid = midReachable.getOrDefault(encode(u, v, n), 0)
-                    + midReachable.getOrDefault(encode(v, u, n), 0);
+            final int mid =
+                    midReachable.getOrDefault(encode(u, v, n), 0) + midReachable.getOrDefault(encode(v, u, n), 0);
             //uv向和vu向可能重复可能会少，因此和w取最小值
             result += Math.min(w, mid);
         }
@@ -2034,6 +2028,52 @@ public class Solution {
         return u * n + v;
     }
 
+    //给你一个整数数组 nums ，请你找出数组中乘积最大的非空连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
+    public int maxProduct(int[] nums) {
+        //max[i]表示以i结尾的最大乘积
+        //min[i]表示以i结尾的最小乘积
+        //max[i]状态转移方程为: max[i] = max(max[i-1]*nums[i],min[i-1]*nums[i],nums[i])
+        //min[i]状态转移方程为: max[i] = min(max[i-1]*nums[i],min[i-1]*nums[i],nums[i])
+        //那么最大的乘积则是max[i]中的最大值
+        final int length = nums.length;
+        int[] max = new int[length], min = new int[length];
+        max[0] = nums[0];
+        min[0] = nums[0];
+        for (int i = 1; i < length; i++) {
+            max[i] = Math.max(max[i - 1] * nums[i], Math.max(min[i - 1] * nums[i], nums[i]));
+            min[i] = Math.min(max[i - 1] * nums[i], Math.min(min[i - 1] * nums[i], nums[i]));
+        }
+        int res = max[0];
+        for (int i = 1; i < length; i++) {
+            res = Math.max(max[i], res);
+        }
+        return res;
+
+    }
+
+
+    public int majorityElement(int[] nums) {
+        Arrays.sort(nums);
+        return nums[nums.length / 2];
+    }
+
+    //给你一个数组，将数组中的元素向右轮转 k 个位置，其中 k 是非负数。
+    public void rotate(int[] nums, int k) {
+        final int length = nums.length;
+        k %= length;
+        reverse(nums, 0, nums.length - 1);
+        reverse(nums, 0, k - 1);
+        reverse(nums, k, nums.length - 1);
+        System.out.println();
+    }
+
+    private void reverse(int[] nums, int i, int j) {
+        while (i < j) {
+            int t = nums[i];
+            nums[i++] = nums[j];
+            nums[j--] = t;
+        }
+    }
 
     public static void main(String[] args) {
 
@@ -2056,8 +2096,11 @@ public class Solution {
 //                new String[]{"dinnssoo", "ddinso", "ddiinnso", "ddiinnssoo", "ddiinso", "dinsoo", "ddiinsso", "dinssoo",
 //                        "dinso"});
 //        final boolean anagram = solution.isAnagram("anagram", "nagaram");
-        final int idx = solution.firstUniqChar(
-                "itwqbtcdprfsuprkrjkausiterybzncbmdvkgljxuekizvaivszowqtmrttiihervpncztuoljftlxybpgwnjb");
+//        final int idx = solution.firstUniqChar(
+//                "itwqbtcdprfsuprkrjkausiterybzncbmdvkgljxuekizvaivszowqtmrttiihervpncztuoljftlxybpgwnjb");
+//        solution.maxProduct(new int[]{2, 3, -2, 0, 4, -2});
+        final int[] nums = {1, 2, 3, 4, 5, 6, 7};
+        solution.rotate(nums, 3);
         System.out.println();
 //        int size = 20;
 //        int[] a = new int[size];
