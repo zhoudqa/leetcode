@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.function.Consumer;
@@ -2086,6 +2087,55 @@ public class Solution {
         return false;
     }
 
+    //给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。
+    //请注意，必须在不复制数组的情况下原地对数组进行操作。
+    public void moveZeroes(int[] nums) {
+        //下一个填充的位置，把非0填充完了就可以填充0
+        int idx = 0;
+        for (final int num : nums) {
+            if (num != 0) {
+                nums[idx++] = num;
+            }
+        }
+        for (int i = idx; i < nums.length; i++) {
+            nums[i] = 0;
+        }
+    }
+
+    //给你一个整数数组 nums ，设计算法来打乱一个没有重复元素的数组。打乱后，数组的所有排列应该是 等可能 的。
+    //实现 Solution class:
+    //
+    //Solution(int[] nums) 使用整数数组 nums 初始化对象
+    //int[] reset() 重设数组到它的初始状态并返回
+    //int[] shuffle() 返回数组随机打乱后的结果
+    private int[] shufflePrototype;
+    private int[] shuffled;
+
+    public Solution() {
+    }
+
+    public Solution(int[] nums) {
+        this.shufflePrototype = nums;
+        this.shuffled = new int[nums.length];
+        System.arraycopy(this.shufflePrototype, 0, this.shuffled, 0, nums.length);
+    }
+
+    public int[] reset() {
+        return shufflePrototype;
+    }
+
+    public int[] shuffle() {
+        Random random = new Random();
+        final int len = shufflePrototype.length;
+        for (int i = 0; i < len; i++) {
+            int rand = random.nextInt(len);
+            int t = shuffled[i];
+            shuffled[i] = shuffled[rand];
+            shuffled[rand] = t;
+        }
+        return shuffled;
+    }
+
     public static void main(String[] args) {
 
         final Solution solution = new Solution();
@@ -2110,8 +2160,9 @@ public class Solution {
 //        final int idx = solution.firstUniqChar(
 //                "itwqbtcdprfsuprkrjkausiterybzncbmdvkgljxuekizvaivszowqtmrttiihervpncztuoljftlxybpgwnjb");
 //        solution.maxProduct(new int[]{2, 3, -2, 0, 4, -2});
-        final int[] nums = {1, 2, 3, 4, 5, 6, 7};
-        solution.rotate(nums, 3);
+//        final int[] nums = {1, 2, 3, 4, 5, 6, 7};
+//        solution.rotate(nums, 3);
+        solution.moveZeroes(new int[]{0, 1, 0, 3, 12});
         System.out.println();
 //        int size = 20;
 //        int[] a = new int[size];
