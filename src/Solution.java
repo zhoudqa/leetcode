@@ -2198,7 +2198,37 @@ public class Solution {
         return false;
     }
 
-//    private boolean increasingTwins(int[] nums, int lo, int hi)
+    //一个类似堆栈的数据结构，将元素推入堆栈，并从堆栈中弹出出现频率最高的元素。
+    static class FreqStack {
+
+        private Map<Integer, Integer> freq = new HashMap<>();
+        private Map<Integer, Deque<Integer>> group = new HashMap<>();
+        private int maxFreq;
+
+        public FreqStack() {
+
+        }
+
+        //将一个整数 val 压入栈顶。
+        public void push(int val) {
+            freq.put(val, freq.getOrDefault(val, 0) + 1);
+            group.putIfAbsent(freq.get(val), new ArrayDeque<>());
+            group.get(freq.get(val)).push(val);
+            maxFreq = Math.max(maxFreq, freq.get(val));
+        }
+
+        //删除并返回堆栈中出现频率最高的元素。
+        //如果出现频率最高的元素不只一个，则移除并返回最接近栈顶的元素。
+        public int pop() {
+            final Integer val = group.get(maxFreq).pop();
+            freq.put(val, freq.get(val) - 1);
+            if (group.get(maxFreq).isEmpty()) {
+                //最差还是上次pop出去的
+                maxFreq--;
+            }
+            return val;
+        }
+    }
 
     public static void main(String[] args) {
 
@@ -2228,7 +2258,17 @@ public class Solution {
 //        solution.rotate(nums, 3);
 //        solution.moveZeroes(new int[]{0, 1, 0, 3, 12});
 //        solution.minOperations("11111");
-        solution.increasingTriplet(new int[]{9, 1, 7, 2, 5, 4});
+//        solution.increasingTriplet(new int[]{9, 1, 7, 2, 5, 4});
+        final FreqStack freqStack = new FreqStack();
+        freqStack.push(5);
+        freqStack.push(5);
+        freqStack.push(5);
+        freqStack.push(5);
+        freqStack.push(7);
+        freqStack.pop();
+        freqStack.pop();
+        freqStack.pop();
+        freqStack.pop();
         System.out.println();
 //        int size = 20;
 //        int[] a = new int[size];
