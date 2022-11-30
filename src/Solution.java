@@ -2136,6 +2136,70 @@ public class Solution {
         return shuffled;
     }
 
+    //返回使 s 变成 交替字符串 所需的 最少 操作数。
+    public int minOperations(String s) {
+
+        int evenCnt = 0;
+        int oddCnt = 0;
+        int oddChar = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) - '0' == oddChar) {
+                oddCnt++;
+            } else {
+                evenCnt++;
+            }
+            oddChar ^= 1;
+        }
+        return Math.min(evenCnt, oddCnt);
+    }
+
+    //给你两个整数数组nums1 和 nums2 ，请你以数组形式返回两数组的交集。返回结果中每个元素出现的次数，应与元素在两个数组中都出现的次数一致（如果出现次数不一致，则考虑取较小值）。可以不考虑输出结果的顺序。
+    public int[] intersect(int[] nums1, int[] nums2) {
+        return intersect(nums1, nums2, false);
+    }
+
+    public int[] intersect(int[] nums1, int[] nums2, boolean sorted) {
+        if (!sorted) {
+            Arrays.sort(nums1);
+            Arrays.sort(nums2);
+        }
+        List<Integer> res = new ArrayList<>();
+        int i = 0, j = 0;
+        while (i < nums1.length && j < nums2.length) {
+            if (nums1[i] == nums2[j]) {
+                res.add(nums1[i]);
+                i++;
+                j++;
+            } else if (nums1[i] > nums2[j]) {
+                j++;
+            } else {
+                i++;
+            }
+        }
+        return res.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    //给你一个整数数组nums ，判断这个数组中是否存在长度为 3 的递增子序列。
+    //
+    //如果存在这样的三元组下标 (i, j, k)且满足 i < j < k ，使得nums[i] < nums[j] < nums[k] ，返回 true ；否则，返回 false 。
+    public boolean increasingTriplet(int[] nums) {
+        int lowest = Integer.MAX_VALUE, mid = Integer.MAX_VALUE;
+        for (final int num : nums) {
+            if (num <= lowest) {
+                lowest = num;
+            } else if (num <= mid) {
+                //num > lowest && num <= mid => mid > lowest
+                mid = num;
+            } else {
+                //num > lowest && mid > lowest && num > mid => lowest < mid < num
+                return true;
+            }
+        }
+        return false;
+    }
+
+//    private boolean increasingTwins(int[] nums, int lo, int hi)
+
     public static void main(String[] args) {
 
         final Solution solution = new Solution();
@@ -2162,7 +2226,9 @@ public class Solution {
 //        solution.maxProduct(new int[]{2, 3, -2, 0, 4, -2});
 //        final int[] nums = {1, 2, 3, 4, 5, 6, 7};
 //        solution.rotate(nums, 3);
-        solution.moveZeroes(new int[]{0, 1, 0, 3, 12});
+//        solution.moveZeroes(new int[]{0, 1, 0, 3, 12});
+//        solution.minOperations("11111");
+        solution.increasingTriplet(new int[]{9, 1, 7, 2, 5, 4});
         System.out.println();
 //        int size = 20;
 //        int[] a = new int[size];
