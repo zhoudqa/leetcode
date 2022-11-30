@@ -2213,17 +2213,17 @@ public class Solution {
         public void push(int val) {
             freq.put(val, freq.getOrDefault(val, 0) + 1);
             group.putIfAbsent(freq.get(val), new ArrayDeque<>());
-            group.get(freq.get(val)).push(val);
+            group.get(freq.get(val)).add(val);
             maxFreq = Math.max(maxFreq, freq.get(val));
         }
 
         //删除并返回堆栈中出现频率最高的元素。
         //如果出现频率最高的元素不只一个，则移除并返回最接近栈顶的元素。
         public int pop() {
-            final Integer val = group.get(maxFreq).pop();
+            final Integer val = group.get(maxFreq).removeLast();
             freq.put(val, freq.get(val) - 1);
             if (group.get(maxFreq).isEmpty()) {
-                //最差还是上次pop出去的
+                //最差还是上次remove出去的
                 maxFreq--;
             }
             return val;
