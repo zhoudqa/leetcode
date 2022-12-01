@@ -2230,6 +2230,70 @@ public class Solution {
         }
     }
 
+    //请返回距离你当前位置 曼哈顿距离 最近的 有效 点的下标（下标从 0 开始）
+    public int nearestValidPoint(int x, int y, int[][] points) {
+        int minDist = Integer.MAX_VALUE;
+        int res = -1;
+        for (int i = 0; i < points.length; i++) {
+            if (points[i][0] == x || points[i][1] == y) {
+                int distance = distance(points[i], x, y);
+                if (0 == distance) {
+                    return i;
+                } else if (minDist > distance) {
+                    minDist = distance;
+                    res = i;
+                }
+            }
+        }
+        return res;
+    }
+
+    private int distance(int[] point, int x, int y) {
+        return Math.abs(point[0] - x) + Math.abs(point[1] - y);
+    }
+
+    //给你一个整数数组nums，返回 数组answer，其中answer[i]等于nums中除nums[i]之外其余各元素的乘积。
+    //题目数据 保证 数组nums之中任意元素的全部前缀元素和后缀的乘积都在32 位 整数范围内。
+    //请不要使用除法，且在O(n) 时间复杂度内完成此题。
+    //时间O(N) 空间O(N)
+    public int[] productExceptSelf(int[] nums) {
+        int length = nums.length;
+        //前缀积和后缀积单独保存
+        int[] preProduct = new int[length];
+        int[] sufProduct = new int[length];
+        preProduct[0] = 1;
+        sufProduct[length - 1] = 1;
+        for (int i = 1; i < length; i++) {
+            preProduct[i] = nums[i - 1] * preProduct[i - 1];
+            sufProduct[length - 1 - i] = nums[length - i] * sufProduct[length - i];
+        }
+        int[] ans = new int[length];
+        for (int i = 0; i < length; i++) {
+            //结果为前缀积和后缀积之积
+            ans[i] = preProduct[i] * sufProduct[i];
+        }
+        return ans;
+    }
+
+    //时间O(N) 空间O(1)
+    public int[] productExceptSelfBest(int[] nums) {
+        int length = nums.length;
+        int[] ans = new int[length];
+        ans[0] = 1;
+        for (int i = 1; i < length; i++) {
+            //直接保存前缀积到ans
+            ans[i] = nums[i - 1] * ans[i - 1];
+        }
+        int sufProduct = 1;
+        for (int i = length - 1; i >= 0; i--) {
+            //结果为前缀积和后缀积之积
+            ans[i] *= sufProduct;
+            //后缀积累乘
+            sufProduct *= nums[i];
+        }
+        return ans;
+    }
+
     public static void main(String[] args) {
 
         final Solution solution = new Solution();
@@ -2259,16 +2323,18 @@ public class Solution {
 //        solution.moveZeroes(new int[]{0, 1, 0, 3, 12});
 //        solution.minOperations("11111");
 //        solution.increasingTriplet(new int[]{9, 1, 7, 2, 5, 4});
-        final FreqStack freqStack = new FreqStack();
-        freqStack.push(5);
-        freqStack.push(5);
-        freqStack.push(5);
-        freqStack.push(5);
-        freqStack.push(7);
-        freqStack.pop();
-        freqStack.pop();
-        freqStack.pop();
-        freqStack.pop();
+//        final FreqStack freqStack = new FreqStack();
+//        freqStack.push(5);
+//        freqStack.push(5);
+//        freqStack.push(5);
+//        freqStack.push(5);
+//        freqStack.push(7);
+//        freqStack.pop();
+//        freqStack.pop();
+//        freqStack.pop();
+//        freqStack.pop();
+//        solution.nearestValidPoint(3, 4, new int[][]{{2, 3}});
+        int[] ints = solution.productExceptSelfBest(new int[]{1, 2, 3, 4});
         System.out.println();
 //        int size = 20;
 //        int[] a = new int[size];
