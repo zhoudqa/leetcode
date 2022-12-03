@@ -1,20 +1,4 @@
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class Solution {
@@ -2294,6 +2278,26 @@ public class Solution {
         return ans;
     }
 
+    //给你一个混合字符串 s ，请你返回 s 中 第二大 的数字，如果不存在第二大的数字，请你返回 -1 。
+    //
+    //混合字符串 由小写英文字母和数字组成。
+    public int secondHighest(String s) {
+        int max = -1;
+        int secondMax = -1;
+        for (char c : s.toCharArray()) {
+            if (c >= 48 && c <= 57) {
+                final int val = c - 48;
+                if (val > max) {
+                    secondMax = max;
+                    max = val;
+                } else if (val != max && val > secondMax) {
+                    secondMax = val;
+                }
+            }
+        }
+        return max == secondMax ? -1 : secondMax;
+    }
+
     public static void main(String[] args) {
 
         final Solution solution = new Solution();
@@ -2334,7 +2338,8 @@ public class Solution {
 //        freqStack.pop();
 //        freqStack.pop();
 //        solution.nearestValidPoint(3, 4, new int[][]{{2, 3}});
-        int[] ints = solution.productExceptSelfBest(new int[]{1, 2, 3, 4});
+//        int[] ints = solution.productExceptSelfBest(new int[]{1, 2, 3, 4});
+        solution.secondHighest("ck077");
         System.out.println();
 //        int size = 20;
 //        int[] a = new int[size];
