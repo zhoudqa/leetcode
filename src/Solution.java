@@ -2298,6 +2298,42 @@ public class Solution {
         return max == secondMax ? -1 : secondMax;
     }
 
+
+    static class MinStack {
+
+        private Deque<Integer> stack = new ArrayDeque<>();
+        private Deque<Integer> minStack = new ArrayDeque<>();
+
+
+        //初始化堆栈对象
+        public MinStack() {
+            minStack.push(Integer.MAX_VALUE);
+        }
+
+        //将元素val推入堆栈
+        public void push(int val) {
+            stack.push(val);
+            minStack.push(Math.min(val, minStack.peek()));
+        }
+
+        //删除堆栈顶部的元素
+        public void pop() {
+            stack.pop();
+            minStack.pop();
+        }
+
+        //获取堆栈顶部的元素
+        public int top() {
+            return stack.peek();
+
+        }
+
+        //获取堆栈中的最小元素
+        public int getMin() {
+            return minStack.peek();
+        }
+    }
+
     public static void main(String[] args) {
 
         final Solution solution = new Solution();
