@@ -2334,6 +2334,58 @@ public class Solution {
         }
     }
 
+    //给定整数数组 nums 和整数 k，请返回数组中第 k 个最大的元素。
+    //你必须设计并实现时间复杂度为 O(n) 的算法解决此问题。
+
+
+    public int findKthLargest(int[] nums, int k) {
+        return quickSelect(nums, 0, nums.length - 1, nums.length - k);
+    }
+
+    //快速选择前N小的元素
+    private int quickSelect(int[] nums, int left, int right, int kthSmallest) {
+        if (left == right) {
+            return nums[left];
+        }
+        //中间随机值
+        int partitionIndex = random.nextInt(right - left) + left;
+        int partition = partition(nums, left, right, partitionIndex);
+        if (partition == kthSmallest) {
+            return nums[partition];
+        } else if (partition < kthSmallest) {
+            //切分还需要往右
+            return quickSelect(nums, partition + 1, right, kthSmallest);
+        } else {
+            //切分还需要往左
+            return quickSelect(nums, left, partition - 1, kthSmallest);
+        }
+    }
+
+    final Random random = new Random();
+
+    private int partition(int[] nums, int left, int right, int partitionIndex) {
+        int partitionValue = nums[partitionIndex];
+        //将切分元素转移到最右边
+        swap(nums, right, partitionIndex);
+        int index = left;
+        for (int i = left; i <= right; i++) {
+            if (nums[i] < partitionValue) {
+                //小于切分元素的向左转移
+                swap(nums, i, index++);
+            }
+        }
+        //恢复切分元素的位置=>左边都是比他小的，右边都是比他大的
+        swap(nums, right, index);
+        return index;
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int t = nums[i];
+        nums[i] = nums[j];
+        nums[j] = t;
+    }
+
+
     public static void main(String[] args) {
 
         final Solution solution = new Solution();
