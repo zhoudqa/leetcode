@@ -1,5 +1,9 @@
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Solution1 {
 
@@ -75,6 +79,92 @@ public class Solution1 {
         }
         return smaller >= k;
     }
+
+    static class ListNode {
+
+        int val;
+        ListNode next;
+
+        ListNode() {
+        }
+
+        ListNode(int val) {
+            this.val = val;
+        }
+
+        ListNode(int val, ListNode next) {
+            this.val = val;
+            this.next = next;
+        }
+    }
+
+    public ListNode mergeKLists(ListNode[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        } else if (lists.length == 1) {
+            return lists[0];
+        } else {
+            return mergeLists(lists, 0, lists.length - 1);
+
+        }
+
+    }
+
+    //二分合并
+    private ListNode mergeLists(ListNode[] lists, int left, int right) {
+        if (left == right) {
+            return lists[left];
+        }
+        int mid = left + (right - left) / 2;
+        ListNode leftNode = mergeLists(lists, left, mid);
+        ListNode rightNode = mergeLists(lists, mid + 1, right);
+
+        return mergeListNodes(leftNode, rightNode);
+    }
+
+    private ListNode mergeListNodes(ListNode list, ListNode list1) {
+        if (list == null || list1 == null) {
+            return list != null ? list : list1;
+        }
+        ListNode head = new ListNode(0);
+        ListNode tail = head;
+        ListNode left = list;
+        ListNode right = list1;
+        while (left != null && right != null) {
+            if (left.val < right.val) {
+                //复用以节省空间
+                tail.next = left;
+                left = left.next;
+            } else {
+                tail.next = right;
+                right = right.next;
+            }
+            tail = tail.next;
+        }
+        tail.next = left == null ? right : left;
+        return head.next;
+    }
+
+    //优先队列(堆)方式
+    public ListNode mergeKListsWithHeap(ListNode[] lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        }
+        PriorityQueue<ListNode> pq = new PriorityQueue<>(Comparator.comparingInt(n -> n.val));
+        pq.addAll(Arrays.asList(lists).stream().filter(listNode -> listNode != null).collect(Collectors.toList()));
+        ListNode head = new ListNode(0);
+        ListNode tail = head;
+        while (!pq.isEmpty()) {
+            tail.next = pq.poll();
+            tail = tail.next;
+            //剩下的一截入队列
+            if (tail.next != null) {
+                pq.add(tail.next);
+            }
+        }
+        return head.next;
+    }
+
 
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
