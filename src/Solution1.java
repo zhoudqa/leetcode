@@ -1,8 +1,5 @@
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.*;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
 public class Solution1 {
@@ -165,11 +162,74 @@ public class Solution1 {
         return head.next;
     }
 
+    //给你一个整数数组 nums 和一个整数 k ，请你返回其中出现频率前 k 高的元素。你可以按 任意顺序 返回答案。
+    public int[] topKFrequent(int[] nums, int k) {
+        Map<Integer, Integer> frequencyMap = new HashMap<>();
+        for (int num : nums) {
+            frequencyMap.put(num, frequencyMap.getOrDefault(num, 0) + 1);
+        }
+        //维护大小为k的最小堆
+        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(o -> o[1]));
+        frequencyMap.forEach((val, frequency) -> {
+            //频率比最小的还低，就不需要入堆了，保证堆的大小为k
+            if (pq.size() == k) {
+                if (pq.peek()[1] < frequency) {
+                    pq.poll();
+                    pq.add(new int[]{val, frequency});
+                }
+            } else {
+                pq.add(new int[]{val, frequency});
+            }
+        });
+        int[] res = new int[k];
+        for (int i = 0; i < k; i++) {
+            res[i] = pq.poll()[0];
+        }
+        return res;
+    }
+
+    //给你一个整数数组 nums，有一个大小为k的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k个数字。滑动窗口每次只向右移动一位。
+    //
+    //返回 滑动窗口中的最大值 。
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        int resLen = nums.length - (k - 1);
+        int[] res = new int[resLen];
+        PriorityQueue<int[]> pq = new PriorityQueue<>((o1, o2) -> o2[1] - o1[1]);
+        for (int i = 0; i < k; i++) {
+            pq.add(new int[]{i, nums[i]});
+        }
+        int idx = 0;
+        res[idx++] = pq.peek()[1];
+        for (int i = k; i < nums.length; i++) {
+            pq.add(new int[]{i, nums[i]});
+            int pre = i - k;
+            //低效移除O(N) pq.removeIf(o -> o[0] == pre);
+            while (pq.peek()[0] <= pre) {
+                //高效移除去掉错误答案 i-k坐标的元素
+                pq.poll();
+            }
+            res[idx++] = pq.peek()[1];
+        }
+        return res;
+
+    }
+
 
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
 //        solution.numDifferentIntegers("0a0");
-        solution.kthSmallest(stringToMatrix("[[1,3,5],[6,7,12],[11,14,14]]"), 3);
+//        solution.kthSmallest(stringToMatrix("[[1,3,5],[6,7,12],[11,14,14]]"), 3);
+//        solution.topKFrequent(stringToArray("[1,1,1,2,2,3]"), 2);
+        solution.maxSlidingWindow(stringToArray("[1,-1]"), 1);
+    }
+
+    public static int[] stringToArray(String s) {
+        String[] split = s.substring(1, s.length() - 1).split(",");
+        int[] res = new int[split.length];
+        for (int i = 0; i < split.length; i++) {
+            res[i] = Integer.parseInt(split[i]);
+        }
+        return res;
     }
 
     public static int[][] stringToMatrix(String s) {
