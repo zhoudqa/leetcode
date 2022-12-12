@@ -1,5 +1,11 @@
-import java.util.*;
-import java.util.function.IntFunction;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Solution1 {
@@ -148,7 +154,7 @@ public class Solution1 {
             return null;
         }
         PriorityQueue<ListNode> pq = new PriorityQueue<>(Comparator.comparingInt(n -> n.val));
-        pq.addAll(Arrays.asList(lists).stream().filter(listNode -> listNode != null).collect(Collectors.toList()));
+        pq.addAll(Arrays.stream(lists).filter(Objects::nonNull).collect(Collectors.toList()));
         ListNode head = new ListNode(0);
         ListNode tail = head;
         while (!pq.isEmpty()) {
