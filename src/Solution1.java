@@ -1,11 +1,4 @@
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Solution1 {
@@ -279,6 +272,48 @@ public class Solution1 {
             return x * sgn;
         }
 
+    }
+
+    //给你一个字符串 s 和一个整数 k ，请你找出 s 中的最长子串， 要求该子串中的每一字符出现次数都不少于 k 。返回这一子串的长度。
+    public int longestSubstring(String s, int k) {
+        return longestSubstring(s, 0, s.length() - 1, k);
+    }
+
+
+    //s的[left,right]子串中最长的每个字符出现次数都不小于k的子串
+    private int longestSubstring(String s, int left, int right, int k) {
+        int[] count = new int[26];
+        for (int i = left; i <= right; i++) {
+            count[s.charAt(i) - 'a']++;
+        }
+        int split = -1;
+        for (int i = 0; i < 26; i++) {
+            if (count[i] > 0 && count[i] < k) {
+                //找到第一个不满足k个条件的char
+                split = i;
+            }
+        }
+        //找不到不满足条件的为退出条件
+        if (split == -1) {
+            return right - left + 1;
+        }
+        int i = left;
+        int ret = Integer.MIN_VALUE;
+        //从left到right比较每一个使用split分隔的子串
+        while (i <= right) {
+            while (i <= right && s.charAt(i) - 'a' == split) {
+                i++;
+            }
+            //第一个不为split的index
+            int newLeft = i;
+            while (i <= right && s.charAt(i) - 'a' != split) {
+                i++;
+            }
+            //第一个split的index
+            int newRight = i - 1;
+            ret = Math.max(ret, longestSubstring(s, newLeft, newRight, k));
+        }
+        return ret;
     }
 
 
