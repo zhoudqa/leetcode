@@ -316,6 +316,37 @@ public class Solution1 {
         return ret;
     }
 
+    //给定一个包含 [0, n] 中 n 个数的数组 nums ，找出 [0, n] 这个范围内没有出现在数组中的那个数。
+    public int missingNumber(int[] nums) {
+        int sum = 0;
+        int n = nums.length;
+        for (int i = 0; i < n; i++) {
+            sum += nums[i];
+        }
+        return n * (n + 1) / 2 - sum;
+    }
+
+    //给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+    //请你设计并实现时间复杂度为O(n) 的算法解决此问题。
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> set = new HashSet<>();
+        for (int num : nums) {
+            set.add(num);
+        }
+        int ret = 0;
+        for (int num : set) {
+            //避免无用的循环
+            if (!set.contains(num - 1)) {
+                int j = 0;
+                while (set.contains(num + (++j))) {
+                }
+                ret = Math.max(ret, j);
+            }
+        }
+        return ret;
+
+    }
+
 
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
@@ -323,11 +354,12 @@ public class Solution1 {
 //        solution.kthSmallest(stringToMatrix("[[1,3,5],[6,7,12],[11,14,14]]"), 3);
 //        solution.topKFrequent(stringToArray("[1,1,1,2,2,3]"), 2);
 //        solution.maxSlidingWindow(stringToArray("[1,-1]"), 1);
-        final Codec codec = new Codec();
-        final TreeNode node = codec.deserialize("(1,2,3,X,X,4,5)");
-        Codec ser = new Codec();
-        Codec deser = new Codec();
-        TreeNode ans = deser.deserialize(ser.serialize(node));
+//        final Codec codec = new Codec();
+//        final TreeNode node = codec.deserialize("(1,2,3,X,X,4,5)");
+//        Codec ser = new Codec();
+//        Codec deser = new Codec();
+//        TreeNode ans = deser.deserialize(ser.serialize(node));
+        solution.longestConsecutive(stringToArray("[100,4,200,1,3,2]"));
     }
 
     public static int[] stringToArray(String s) {
