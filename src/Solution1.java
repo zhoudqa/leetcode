@@ -1,4 +1,13 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Solution1 {
@@ -348,6 +357,50 @@ public class Solution1 {
     }
 
 
+    int maxPathSum = Integer.MIN_VALUE;
+
+    //路径 被定义为一条从树中任意节点出发，沿父节点-子节点连接，达到任意节点的序列。同一个节点在一条路径序列中 至多出现一次 。该路径 至少包含一个 节点，且不一定经过根节点。
+    //
+    //路径和 是路径中各节点值的总和。
+    //
+    //给你一个二叉树的根节点 root ，返回其 最大路径和 。
+    //递归
+    public int maxPathSum(TreeNode root) {
+        maxSingleSide(root);
+        return maxPathSum;
+    }
+
+    //该函数返回包含root节点的最大路径和
+    private int maxSingleSide(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        final int leftMax = Math.max(0, maxSingleSide(root.left));
+        final int maxRight = Math.max(0, maxSingleSide(root.right));
+        //不断更新路径和
+        maxPathSum = Math.max(maxPathSum, root.val + leftMax + maxRight);
+        return root.val + Math.max(leftMax, maxRight);
+
+    }
+
+    //给你一个整数 n ，返回 和为 n 的完全平方数的最少数量 。
+    //
+    //完全平方数 是一个整数，其值等于另一个整数的平方；换句话说，其值等于一个整数自乘的积。例如，1、4、9 和 16 都是完全平方数，而 3 和 11 不是。
+    public int numSquares(int n) {
+        //f[i] 表示最少需要多少个数的平方来表示整数i
+        //f[0]=0
+        //f[i]=1+ min(f[i-j^2),j^2<=j
+        int[] f = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            int minn = Integer.MAX_VALUE;
+            for (int j = 1; j * j <= i; j++) {
+                minn = Math.min(minn, f[i - j * j]);
+            }
+            f[i] = minn + 1;
+        }
+        return f[n];
+    }
+
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
 //        solution.numDifferentIntegers("0a0");
@@ -360,6 +413,8 @@ public class Solution1 {
 //        Codec deser = new Codec();
 //        TreeNode ans = deser.deserialize(ser.serialize(node));
         solution.longestConsecutive(stringToArray("[100,4,200,1,3,2]"));
+        solution.numSquares(12);
+        solution.numSquares(13);
     }
 
     public static int[] stringToArray(String s) {
