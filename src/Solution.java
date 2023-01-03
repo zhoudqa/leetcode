@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class Solution {
@@ -1570,8 +1571,7 @@ public class Solution {
             for (int j = 0; j < i; j++) {
                 if (check(s, j, i, wordDictSet, maxLen) && dp.get(j) != null) {
                     String suffix = s.substring(j, i);
-                    dp.computeIfAbsent(i, k -> new ArrayList<>());
-                    final List<String> iWords = dp.get(i);
+                    List<String> iWords = dp.computeIfAbsent(i, k -> new ArrayList<>());
                     if (dp.get(j).isEmpty()) {
                         iWords.add(suffix);
                     } else {
@@ -2196,8 +2196,8 @@ public class Solution {
         //将一个整数 val 压入栈顶。
         public void push(int val) {
             freq.put(val, freq.getOrDefault(val, 0) + 1);
-            group.putIfAbsent(freq.get(val), new ArrayDeque<>());
-            group.get(freq.get(val)).add(val);
+            //group中包含一个val所有出现的次数，1、2、3...
+            group.putIfAbsent(freq.get(val), new ArrayDeque<>()).add(val);
             maxFreq = Math.max(maxFreq, freq.get(val));
         }
 
@@ -2205,7 +2205,7 @@ public class Solution {
         //如果出现频率最高的元素不只一个，则移除并返回最接近栈顶的元素。
         public int pop() {
             final Integer val = group.get(maxFreq).removeLast();
-            freq.put(val, freq.get(val) - 1);
+            freq.computeIfPresent(val, (key, freqVal) -> freqVal - 1);
             if (group.get(maxFreq).isEmpty()) {
                 //最差还是上次remove出去的
                 maxFreq--;

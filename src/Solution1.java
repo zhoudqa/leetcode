@@ -1,13 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Solution1 {
@@ -356,6 +347,152 @@ public class Solution1 {
 
     }
 
+    static class Node {
+        int val;
+        Node next;
+        Node random;
+
+        public Node(int val) {
+            this.val = val;
+            this.next = null;
+            this.random = null;
+        }
+    }
+
+    Map<Node, Node> cache = new HashMap<>();
+
+    //给你一个长度为 n 的链表，每个节点包含一个额外增加的随机指针 random ，该指针可以指向链表中的任何节点或空节点。
+    //构造这个链表的 深拷贝。
+    public Node copyRandomList(Node head) {
+        if (head == null) {
+            return null;
+        }
+        if (!cache.containsKey(head)) {
+            Node copy = new Node(head.val);
+            cache.put(head, copy);
+            copy.next = copyRandomList(head.next);
+            copy.random = copyRandomList(head.random);
+        }
+        return cache.get(head);
+    }
+
+    //给你一个链表的头节点 head ，判断链表中是否有环。
+    public boolean hasCycle(ListNode head) {
+        Set<ListNode> cache = new HashSet<>();
+        ListNode node = head;
+        while (node != null) {
+            if (cache.contains(node)) {
+                return true;
+            }
+            cache.add(node);
+            node = node.next;
+        }
+        return false;
+    }
+
+    //快慢指针
+    public boolean hasCycleBest(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //给你链表的头结点 head ，请将其按 升序 排列并返回 排序后的链表
+    public ListNode sortList(ListNode head) {
+        List<Integer> array = new ArrayList<>();
+        ListNode node = head;
+        while (node != null) {
+            array.add(node.val);
+            node = node.next;
+        }
+        if (array.isEmpty()) {
+            return null;
+        }
+        array.sort(Integer::compareTo);
+        ListNode newHead = new ListNode(array.get(0));
+        ListNode node1 = newHead;
+        for (int i = 1; i < array.size(); i++) {
+            node1.next = new ListNode(array.get(i));
+            node1 = node1.next;
+        }
+        return newHead;
+    }
+
+    public ListNode sortListBest(ListNode head) {
+        if (head == null) {
+            return null;
+        }
+        int len = 0;
+        ListNode node = head;
+        while (node != null) {
+            len++;
+            node = node.next;
+        }
+        ListNode preHead = new ListNode(-1);
+        preHead.next = head;
+        for (int duan = 1; duan < len; duan *= 2) {
+            //每次循环之后，内部总是段段有序的
+            ListNode pre = preHead, cur = preHead.next;
+            while (cur != null) {
+                //pre指向前一个段的末尾，cur指向当前段的头
+                ListNode head1 = cur;
+                for (int i = 1; i < duan && cur.next != null; i++) {
+                    cur = cur.next;
+                }
+                ListNode head2 = cur.next;
+                //断开Merge两段
+                cur.next = null;
+                cur = head2;
+                for (int i = 1; i < duan && cur != null && cur.next != null; i++) {
+                    cur = cur.next;
+                }
+                ListNode next = null;
+                if (cur != null) {
+                    next = cur.next;
+                    //断开未排序节点的下段连接
+                    cur.next = null;
+                }
+                //用于连接前后分段
+                pre.next = merge2ListNode(head1, head2);
+                while (pre.next != null) {
+                    pre = pre.next;
+                }
+                cur =  next;
+            }
+        }
+        return preHead.next;
+
+    }
+
+    public ListNode merge2ListNode(ListNode head1, ListNode head2) {
+        ListNode preHead = new ListNode();
+        ListNode temp = preHead, temp1 = head1, temp2 = head2;
+        while (temp1 != null && temp2 != null) {
+            if (temp1.val < temp2.val) {
+                temp.next = temp1;
+                temp1 = temp1.next;
+            } else {
+                temp.next = temp2;
+                temp2 = temp2.next;
+            }
+            temp = temp.next;
+        }
+        if (temp1 != null) {
+            temp.next = temp1;
+        }
+        if (temp2 != null) {
+            temp.next = temp2;
+        }
+        return preHead.next;
+    }
+
 
     int maxPathSum = Integer.MIN_VALUE;
 
@@ -412,9 +549,10 @@ public class Solution1 {
 //        Codec ser = new Codec();
 //        Codec deser = new Codec();
 //        TreeNode ans = deser.deserialize(ser.serialize(node));
-        solution.longestConsecutive(stringToArray("[100,4,200,1,3,2]"));
-        solution.numSquares(12);
-        solution.numSquares(13);
+//        solution.longestConsecutive(stringToArray("[100,4,200,1,3,2]"));
+        ListNode head = new ListNode(1);
+        head.next = new ListNode(2);
+        boolean b = solution.hasCycle(head);
     }
 
     public static int[] stringToArray(String s) {
