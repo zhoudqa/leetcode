@@ -1,5 +1,6 @@
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Solution1 {
 
@@ -204,7 +205,7 @@ public class Solution1 {
             int pre = i - k;
             //低效移除O(N) pq.removeIf(o -> o[0] == pre);
             while (pq.peek()[0] <= pre) {
-                //高效移除去掉错误答案 i-k坐标的元素
+                //高效移除去掉错误答案 i-k坐标的元素，因为只要peek的数字坐标在窗口中就可以
                 pq.poll();
             }
             res[idx++] = pq.peek()[1];
@@ -464,7 +465,7 @@ public class Solution1 {
                 while (pre.next != null) {
                     pre = pre.next;
                 }
-                cur =  next;
+                cur = next;
             }
         }
         return preHead.next;
@@ -493,6 +494,29 @@ public class Solution1 {
         return preHead.next;
     }
 
+    //给你单链表的头节点 head ，请你反转链表，并返回反转后的链表。
+    public ListNode reverseList(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode tail = head.next;
+        ListNode nextHead = reverseList(head.next);
+        head.next = null;
+        tail.next = head;
+        return nextHead;
+    }
+
+    //删除node节点
+    public void deleteNode(ListNode node) {
+        node.val = node.next.val;
+        node.next = node.next.next;
+    }
+
+    //给定一组非负整数 nums，重新排列每个数的顺序（每个数不可拆分）使之组成一个最大的整数。
+    public String largestNumber(int[] nums) {
+        String s = Arrays.stream(nums).mapToObj(String::valueOf).sorted((s1, s2) -> (s2 + s1).compareTo(s1 + s2)).reduce((a, b) -> a + b).orElseThrow(RuntimeException::new);
+        return '0' == s.charAt(0) ? "0" : s;
+    }
 
     int maxPathSum = Integer.MIN_VALUE;
 
@@ -550,9 +574,10 @@ public class Solution1 {
 //        Codec deser = new Codec();
 //        TreeNode ans = deser.deserialize(ser.serialize(node));
 //        solution.longestConsecutive(stringToArray("[100,4,200,1,3,2]"));
-        ListNode head = new ListNode(1);
-        head.next = new ListNode(2);
-        boolean b = solution.hasCycle(head);
+//        ListNode head = new ListNode(1);
+//        head.next = new ListNode(2);
+//        solution.reverseList(head);
+        String s = solution.largestNumber(new int[]{3, 30, 34, 5, 9});
     }
 
     public static int[] stringToArray(String s) {
