@@ -349,6 +349,7 @@ public class Solution1 {
     }
 
     static class Node {
+
         int val;
         Node next;
         Node random;
@@ -514,7 +515,8 @@ public class Solution1 {
 
     //给定一组非负整数 nums，重新排列每个数的顺序（每个数不可拆分）使之组成一个最大的整数。
     public String largestNumber(int[] nums) {
-        String s = Arrays.stream(nums).mapToObj(String::valueOf).sorted((s1, s2) -> (s2 + s1).compareTo(s1 + s2)).reduce((a, b) -> a + b).orElseThrow(RuntimeException::new);
+        String s = Arrays.stream(nums).mapToObj(String::valueOf).sorted((s1, s2) -> (s2 + s1).compareTo(s1 + s2))
+                .reduce((a, b) -> a + b).orElseThrow(RuntimeException::new);
         return '0' == s.charAt(0) ? "0" : s;
     }
 
@@ -560,6 +562,26 @@ public class Solution1 {
             f[i] = minn + 1;
         }
         return f[n];
+    }
+
+    //给定一个非负整数数组 nums ，你最初位于数组的 第一个下标 。
+    //数组中的每个元素代表你在该位置可以跳跃的最大长度。
+    //判断你是否能够到达最后一个下标。
+    public boolean canJump(int[] nums) {
+        if (nums == null || nums.length == 0) {
+            return false;
+        }
+        int index = 0;//当前能跳到的最远的距离(坐标)
+        final int lastIndex = nums.length - 1;
+        for (int i = 0; i <= index; i++) {
+            //不断更新距离
+            index = Math.max(index, i + nums[i]);
+            if (index >= lastIndex) {
+                //可以跳到最后一个坐标
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void main(String[] args) {
