@@ -1,6 +1,5 @@
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Solution1 {
 
@@ -584,6 +583,127 @@ public class Solution1 {
         return false;
     }
 
+    //给定一个非负整数数组 nums ，你最初位于数组的 第一个下标 。
+    //数组中的每个元素代表你在该位置可以跳跃的最大长度。
+    //返回可以跳到最后一个最后一个坐标的最小跳跃数
+    public int jump(int[] nums) {
+        int[] minSteps = new int[nums.length];
+        for (int i = 1; i < nums.length; i++) {
+            minSteps[i] = Integer.MAX_VALUE;
+        }
+        final int lastIndex = nums.length - 1;
+        for (int i = 1; i <= lastIndex; i++) {
+            for (int j = 0; j < i; j++) {
+                if (j + nums[j] >= i) {
+                    minSteps[i] = Math.min(minSteps[j] + 1, minSteps[i]);
+                }
+            }
+        }
+        return minSteps[lastIndex];
+    }
+
+    public int jumpBest(int[] nums) {
+        int steps = 0;
+        int maxPos = 0;
+        int curStepEnd = 0;
+        //不访问最后的节点，nums[nums.length-1]一定用不上
+        for (int i = 0; i < nums.length - 1; i++) {
+            //当前step最远可以到的距离
+            maxPos = Math.max(maxPos, i + nums[i]);
+            if (i == curStepEnd) {
+                //更新当前step可以走到的最远距离
+                curStepEnd = maxPos;
+                //进入下次跳跃
+                steps++;
+            }
+        }
+        return steps;
+    }
+
+    //给你一个整数数组 nums ，判断是否存在三元组 [nums[i], nums[j], nums[k]] 满足 i != j、i != k 且 j != k ，同时还满足 nums[i] + nums[j] + nums[k] == 0 。
+    //请你返回所有和为 0 且不重复的三元组。
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (nums == null || nums.length < 3) {
+            return res;
+        }
+        Arrays.sort(nums);
+        for (int i = 0; i < nums.length - 2; i++) {
+            if (nums[i] > 0) {
+                //后面都更大了，和不会为0了
+                break;
+            }
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            int twoSum = -nums[i];
+            int left = i + 1;
+            int right = nums.length - 1;
+            while (left < right) {
+                final int delta = nums[left] + nums[right] - twoSum;
+                if (delta == 0) {
+                    res.add(Arrays.asList(nums[i], nums[left++], nums[right--]));
+                    //去重，不能和前一个数一样
+                    while (left < right && nums[left] == nums[left - 1]) {
+                        left++;
+                    }
+                    while (left < right && nums[right] == nums[right + 1]) {
+                        right--;
+                    }
+                } else if (delta > 0) {
+                    right--;
+                } else {
+                    left++;
+                }
+            }
+        }
+        return res;
+
+    }
+
+    //给你一个长度为 n 的整数数组 nums 和 一个目标值 target。请你从 nums 中选出三个整数，使它们的和与 target 最接近。
+    //返回这三个数的和。
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int res = nums[0] + nums[1] + nums[2];
+        int minAbs = Math.abs(res - target);
+        for (int i = 0; i < nums.length - 2; i++) {
+            if (i > 0 && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            int targetTwoSum = target - nums[i];
+            if (targetTwoSum <= 0 && nums[i + 1] > 0) {
+                break;
+            }
+            int left = i + 1, right = nums.length - 1;
+            while (left < right) {
+                final int sum = nums[i] + nums[left] + nums[right];
+                if (sum - target == 0) {
+                    return target;
+                }
+                if (Math.abs(sum - target) < Math.abs(res - target)) {
+                    res = sum;
+                }
+                if (sum > target) {
+                    //如果right不变，left增大，那么sum只会增大，更大于target了，所以此时应当减小right
+                    right--;
+                    //去重
+                    while (left < right && nums[right] == nums[right + 1]) {
+                        right--;
+                    }
+                } else {
+                    //如果left不变，right减小，sum只会减小，更小于target了，所以此时应当增大left
+                    left++;
+                    //去重
+                    while (left < right && nums[left] == nums[left - 1]) {
+                        left++;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
 //        solution.numDifferentIntegers("0a0");
@@ -599,7 +719,9 @@ public class Solution1 {
 //        ListNode head = new ListNode(1);
 //        head.next = new ListNode(2);
 //        solution.reverseList(head);
-        String s = solution.largestNumber(new int[]{3, 30, 34, 5, 9});
+//        String s = solution.largestNumber(new int[]{3, 30, 34, 5, 9});
+//        solution.jump(new int[]{2, 3, 1, 1, 4});
+        solution.threeSumClosest(new int[]{4, 0, 5, -5, 3, 3, 0, -4, -5}, -2);
     }
 
     public static int[] stringToArray(String s) {
