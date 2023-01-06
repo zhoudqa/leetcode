@@ -666,7 +666,6 @@ public class Solution1 {
     public int threeSumClosest(int[] nums, int target) {
         Arrays.sort(nums);
         int res = nums[0] + nums[1] + nums[2];
-        int minAbs = Math.abs(res - target);
         for (int i = 0; i < nums.length - 2; i++) {
             if (i > 0 && nums[i] == nums[i - 1]) {
                 continue;
@@ -685,14 +684,14 @@ public class Solution1 {
                     res = sum;
                 }
                 if (sum > target) {
-                    //如果right不变，left增大，那么sum只会增大，更大于target了，所以此时应当减小right
+                    //减小sum
                     right--;
                     //去重
                     while (left < right && nums[right] == nums[right + 1]) {
                         right--;
                     }
                 } else {
-                    //如果left不变，right减小，sum只会减小，更小于target了，所以此时应当增大left
+                    //增大sum
                     left++;
                     //去重
                     while (left < right && nums[left] == nums[left - 1]) {
