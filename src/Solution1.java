@@ -703,6 +703,131 @@ public class Solution1 {
         return res;
     }
 
+    //在一条环路上有 n 个加油站，其中第 i 个加油站有汽油 gas[i] 升。
+    //你有一辆油箱容量无限的的汽车，从第 i 个加油站开往第 i+1 个加油站需要消耗汽油 cost[i] 升。你从其中的一个加油站出发，开始时油箱为空。
+    //给定两个整数数组 gas 和 cost ，如果你可以绕环路行驶一周，则返回出发时加油站的编号，否则返回 -1 。如果存在解，则 保证 它是 唯一 的。
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        final int length = gas.length;
+        int[] remain = new int[length];//记录到下一个站剩余的油量
+        for (int i = 0; i < length; i++) {
+            remain[i] = gas[i] - cost[i];
+        }
+        for (int i = 0; i < length; i++) {
+            if (i > 0 && remain[i] == remain[i - 1]) {
+                continue;
+            }
+            if (remain[i] >= 0 && canCompleteCircuit(i, remain)) {
+                return i;
+            }
+        }
+        return -1;
+
+    }
+
+    //从i点可以转一圈
+    private boolean canCompleteCircuit(int i, int[] gas, int[] cost) {
+        final int len = gas.length;
+        int remain = 0;
+        int j = i;
+        do {
+            remain += gas[j] - cost[j];
+            if (remain < 0) {
+                return false;
+            }
+            j = (j + 1) % len;
+        } while (j != i);
+        return true;
+    }
+
+    public int canCompleteCircuitBest(int[] gas, int[] cost) {
+        int len = gas.length;
+        int i = 0;
+        while (i < len) {
+            //remain指到达下一个点之后剩余的油
+            int step = 0;
+            int remain = 0;
+            //尝试找到第一个到不了的点
+            while (step < len) {
+                int j = (i + step) % len;
+                remain += gas[j] - cost[j];
+                if (remain < 0) {
+                    break;
+                }
+                step++;
+            }
+            if (step == len) {
+                //走回来了
+                return i;
+            }
+            //到不了的第一个坐标为step+1
+            i += step + 1;
+        }
+        return -1;
+    }
+
+    //给你一个字符串 s ，请你去除字符串中重复的字母，使得每个字母只出现一次。需保证 返回结果的字典序最小（要求不能打乱其他字符的相对位置）。
+    //https://leetcode.cn/problems/remove-duplicate-letters/solutions/527359/qu-chu-zhong-fu-zi-mu-by-leetcode-soluti-vuso/
+    public String removeDuplicateLetters(String s) {
+        int[] lastIndex = new int[26];
+        final char[] chars = s.toCharArray();
+        final int len = chars.length;
+        for (int i = 0; i < len; i++) {
+            lastIndex[chars[i] - 'a'] = i;
+        }
+        boolean[] visited = new boolean[26];
+        Deque<Character> stack = new ArrayDeque<>();
+        for (int i = 0; i < len; i++) {
+            if (visited[chars[i] - 'a']) {
+                //在栈中的元素已经是最小字典序了
+                continue;
+            }
+            //字典序更小的且栈顶元素后面还有，则去掉栈顶元素让字典序更小的入栈
+            char peekChar;
+            while (!stack.isEmpty() && (peekChar = stack.peekLast()) > chars[i] && lastIndex[peekChar - 'a'] > i) {
+                visited[stack.removeLast() - 'a'] = false;
+            }
+            stack.offerLast(chars[i]);
+            visited[chars[i] - 'a'] = true;
+        }
+        StringBuilder sb = new StringBuilder();
+        stack.forEach(sb::append);
+        return sb.toString();
+    }
+
+    //给你一个整数 n ，请你生成并返回所有由 n 个节点组成且节点值从 1 到 n 互不相同的不同 二叉搜索树 。可以按 任意顺序 返回答案。
+    public List<TreeNode> generateTrees(int n) {
+        if (n == 0) {
+            return Collections.emptyList();
+        }
+        return generateTrees(1, n);
+    }
+
+    public List<TreeNode> generateTrees(int begin, int end) {
+        List<TreeNode> allTrees = new ArrayList<>();
+        if (begin > end) {
+            //用于后面遍历的时候不跳过
+            allTrees.add(null);
+            return allTrees;
+        }
+        //左右闭合区间
+        for (int i = begin; i <= end; i++) {
+            //i左边的所有集合
+            final List<TreeNode> leftTrees = generateTrees(begin, i - 1);
+            //i右边的所有集合
+            final List<TreeNode> rightTrees = generateTrees(i + 1, end);
+            for (final TreeNode leftTree : leftTrees) {
+                for (final TreeNode rightTree : rightTrees) {
+                    final TreeNode root = new TreeNode(i);
+                    root.left = leftTree;
+                    root.right = rightTree;
+                    allTrees.add(root);
+                }
+            }
+        }
+        return allTrees;
+    }
+
+
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
 //        solution.numDifferentIntegers("0a0");
@@ -720,7 +845,9 @@ public class Solution1 {
 //        solution.reverseList(head);
 //        String s = solution.largestNumber(new int[]{3, 30, 34, 5, 9});
 //        solution.jump(new int[]{2, 3, 1, 1, 4});
-        solution.threeSumClosest(new int[]{4, 0, 5, -5, 3, 3, 0, -4, -5}, -2);
+//        solution.threeSumClosest(new int[]{4, 0, 5, -5, 3, 3, 0, -4, -5}, -2);
+//        solution.canCompleteCircuit(new int[]{5, 1, 2, 3, 4}, new int[]{4, 4, 1, 5, 1});
+        solution.canCompleteCircuit(new int[]{3}, new int[]{3});
     }
 
     public static int[] stringToArray(String s) {
