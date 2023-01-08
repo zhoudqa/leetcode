@@ -716,7 +716,7 @@ public class Solution1 {
             if (i > 0 && remain[i] == remain[i - 1]) {
                 continue;
             }
-            if (remain[i] >= 0 && canCompleteCircuit(i, remain)) {
+            if (remain[i] >= 0 && canCompleteCircuit(i, gas, cost)) {
                 return i;
             }
         }
@@ -827,6 +827,127 @@ public class Solution1 {
         return allTrees;
     }
 
+    //给你一个链表的头节点 head ，旋转链表，将链表每个节点向右移动 k 个位置。
+    public ListNode rotateRight(ListNode head, int k) {
+        if (head == null) {
+            return null;
+        }
+        ListNode leftPre = head;
+        ListNode right = head;
+        for (int i = 0; i < k; i++) {
+            if (right.next == null) {
+                right = head;
+            } else {
+                right = right.next;
+            }
+        }
+        if (leftPre == right) {
+            //k为链表长度
+            return head;
+        }
+        while (right.next != null) {
+            leftPre = leftPre.next;
+            right = right.next;
+        }
+        final ListNode newHead = leftPre.next;
+        leftPre.next = null;
+        right.next = head;
+
+        return newHead;
+    }
+
+    //给你二叉树的根节点 root ，返回其节点值 自底向上的层序遍历 。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        if (root == null) {
+            return Collections.emptyList();
+        }
+        List<List<Integer>> res = new ArrayList<>();
+        Deque<TreeNode> deque = new ArrayDeque<>();
+        deque.addFirst(root);
+        while (!deque.isEmpty()) {
+            int levelSize = deque.size();
+            List<Integer> levelNodes = new ArrayList<>();
+            for (int i = 0; i < levelSize; i++) {
+                final TreeNode node = deque.removeLast();
+                levelNodes.add(node.val);
+                if (node.left != null) {
+                    deque.addFirst(node.left);
+                }
+                if (node.right != null) {
+                    deque.addFirst(node.right);
+                }
+            }
+            res.add(levelNodes);
+        }
+        Collections.reverse(res);
+        return res;
+    }
+
+    //最长摆动序列：https://leetcode.cn/problems/wiggle-subsequence/description/
+    public int wiggleMaxLength(int[] nums) {
+        int n = nums.length;
+        if (n < 2) {
+            return n;
+        }
+        int up = 1, down = 1;
+        for (int i = 1; i < n; i++) {
+            if (nums[i] > nums[i - 1]) {
+                up = Math.max(up, down + 1);
+            } else if (nums[i] < nums[i - 1]) {
+                down = Math.max(up + 1, down);
+            }
+        }
+        return Math.max(up, down);
+    }
+
+    //给你二叉搜索树的根节点 root ，该树中的 恰好 两个节点的值被错误地交换。请在不改变其结构的情况下，恢复这棵树 。
+    public void recoverTree(TreeNode root) {
+        List<Integer> nums = new ArrayList<>();
+        inorder(root, nums);
+        int[] swapped = findTwoSwapped(nums);
+        recover(root, 2, swapped[0], swapped[1]);
+    }
+
+    public void inorder(TreeNode root, List<Integer> nums) {
+        if (root == null) {
+            return;
+        }
+        inorder(root.left, nums);
+        nums.add(root.val);
+        inorder(root.right, nums);
+    }
+
+    //如果2个交换的节点不相邻，那么实际应当是第一次反序左节点和第二次反序右节点
+    public int[] findTwoSwapped(List<Integer> nums) {
+        int n = nums.size();
+        int index1 = -1, index2 = -1;
+        for (int i = 0; i < n - 1; ++i) {
+            if (nums.get(i + 1) < nums.get(i)) {
+                index2 = i + 1;
+                if (index1 == -1) {
+                    index1 = i;
+                } else {
+                    break;
+                }
+            }
+        }
+        int x = nums.get(index1), y = nums.get(index2);
+        return new int[]{x, y};
+    }
+
+    public void recover(TreeNode root, int count, int x, int y) {
+        if (root != null) {
+            if (root.val == x || root.val == y) {
+                root.val = root.val == x ? y : x;
+                if (--count == 0) {
+                    return;
+                }
+            }
+            recover(root.right, count, x, y);
+            recover(root.left, count, x, y);
+        }
+    }
+
 
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
@@ -847,7 +968,24 @@ public class Solution1 {
 //        solution.jump(new int[]{2, 3, 1, 1, 4});
 //        solution.threeSumClosest(new int[]{4, 0, 5, -5, 3, 3, 0, -4, -5}, -2);
 //        solution.canCompleteCircuit(new int[]{5, 1, 2, 3, 4}, new int[]{4, 4, 1, 5, 1});
-        solution.canCompleteCircuit(new int[]{3}, new int[]{3});
+//        solution.canCompleteCircuit(new int[]{3}, new int[]{3});
+        final ListNode listNode = stringToListNode("[1,2,3,4,5]");
+        solution.rotateRight(listNode, 2);
+    }
+
+
+    public static ListNode stringToListNode(String s) {
+        final List<Integer> ints = Arrays.stream(s.substring(1, s.length() - 1).split(",")).map(Integer::parseInt)
+                .collect(Collectors.toList());
+        ListNode head = new ListNode(ints.get(0));
+        ListNode pre = head;
+        ListNode node;
+        for (int i = 1; i < ints.size(); i++) {
+            node = new ListNode(ints.get(i));
+            pre.next = node;
+            pre = node;
+        }
+        return head;
     }
 
     public static int[] stringToArray(String s) {
