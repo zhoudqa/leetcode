@@ -948,6 +948,38 @@ public class Solution1 {
         }
     }
 
+    //给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。
+    //你可以认为每种硬币的数量是无限的。
+    public int coinChange(int[] coins, int amount) {
+        if (amount < 1) {
+            return 0;
+        }
+        int[] cache = new int[amount + 1];
+        final int res = coinChange(coins, amount, cache);
+        return res == Integer.MAX_VALUE ? -1 : res;
+    }
+
+    private int coinChange(int[] coins, int amount, int[] cache) {
+        if (amount < 0) {
+            return -1;
+        }
+        if (amount == 0) {
+            return 0;
+        }
+        if (cache[amount] != 0) {
+            return cache[amount];
+        }
+        int res = Integer.MAX_VALUE;
+        for (final int coin : coins) {
+            final int remainMin = coinChange(coins, amount - coin, cache);
+            if (remainMin >= 0) {
+                res = Math.min(res, 1 + remainMin);
+            }
+        }
+        cache[amount] = res == Integer.MAX_VALUE ? -1 : res;
+        return cache[amount];
+    }
+
 
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
@@ -969,8 +1001,9 @@ public class Solution1 {
 //        solution.threeSumClosest(new int[]{4, 0, 5, -5, 3, 3, 0, -4, -5}, -2);
 //        solution.canCompleteCircuit(new int[]{5, 1, 2, 3, 4}, new int[]{4, 4, 1, 5, 1});
 //        solution.canCompleteCircuit(new int[]{3}, new int[]{3});
-        final ListNode listNode = stringToListNode("[1,2,3,4,5]");
-        solution.rotateRight(listNode, 2);
+//        final ListNode listNode = stringToListNode("[1,2,3,4,5]");
+//        solution.rotateRight(listNode, 2);
+        solution.coinChange(new int[]{1, 2, 5}, 11);
     }
 
 
