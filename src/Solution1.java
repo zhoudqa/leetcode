@@ -980,6 +980,110 @@ public class Solution1 {
         return cache[amount];
     }
 
+    // 剑指 Offer II 116. 省份数量
+    // 找出二阶nxn矩阵中互不相连的总块数
+    public int findCircleNum(int[][] isConnected) {
+        int n = isConnected.length;
+        boolean[] visited = new boolean[n];
+        int provinces = 0;
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                dfs(visited, isConnected, i);
+                provinces++;
+            }
+        }
+        return provinces;
+    }
+
+    private void dfs(boolean[] visited, int[][] isConnected, int i) {
+        for (int j = 0; j < isConnected.length; j++) {
+            if (!visited[j] && isConnected[i][j] == 1) {
+                visited[j] = true;
+                dfs(visited, isConnected, j);
+            }
+        }
+    }
+
+    //给你二叉树的根节点 root 和一个整数目标和 target ，找出所有 从根节点到叶子节点 路径总和等于给定目标和的路径。
+    public List<List<Integer>> pathSum(TreeNode root, int target) {
+        if (root == null) {
+            return Collections.emptyList();
+        }
+        List<List<Integer>> res = new ArrayList<>();
+        dfs(root, target, new ArrayDeque<>(), res);
+        return res;
+
+    }
+
+    private void dfs(TreeNode node, int target, Deque<Integer> path, List<List<Integer>> res) {
+        if (node == null) {
+            return;
+        }
+        path.addLast(node.val);
+        final int remain = target - node.val;
+        if (node.left == null && node.right == null) {
+            //叶子节点
+            if (remain == 0) {
+                res.add(new ArrayList<>(path));
+            }
+        } else {
+            //非叶子节点
+            dfs(node.left, remain, path, res);
+            dfs(node.right, remain, path, res);
+        }
+        path.removeLast();
+    }
+
+    //给定两个整数 n 和 k，返回 1 ... n 中所有可能的 k 个数的组合。
+    //n个数挑k个不同的数
+    public List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> resList = new ArrayList<>();
+        if (n == k) {
+            List<Integer> res = new ArrayList<>();
+            for (int i = 1; i <= n; i++) {
+                res.add(i);
+            }
+            resList.add(res);
+            return resList;
+        }
+        dfs(1, n, k, resList, new LinkedList<>());
+        return resList;
+    }
+
+    private void dfs(int i, int n, int k, List<List<Integer>> resList, Deque<Integer> stack) {
+        if (stack.size() + n - i + 1 < k) {
+            //剩余的所有数都不够k个
+            return;
+        }
+        //记录当前的选择
+        if (stack.size() == k) {
+            resList.add(new ArrayList<>(stack));
+            return;
+        }
+        //选择当前数字
+        stack.addLast(i);
+        dfs(i + 1, n, k, resList, stack);
+        stack.removeLast();
+        //不选择当前数字
+        dfs(i + 1, n, k, resList, stack);
+    }
+
+
+    //给定一个二叉树 根节点 root ，树的每个节点的值要么是 0，要么是 1。请剪除该二叉树中所有节点的值为 0 的子树。
+    //
+    //节点 node 的子树为 node 本身，以及所有 node 的后代。
+    public TreeNode pruneTree(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        root.left = pruneTree(root.left);
+        root.right = pruneTree(root.right);
+        if (root.left == null && root.right == null && root.val == 0) {
+            return null;
+        }
+        return root;
+    }
+
 
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
@@ -1003,7 +1107,9 @@ public class Solution1 {
 //        solution.canCompleteCircuit(new int[]{3}, new int[]{3});
 //        final ListNode listNode = stringToListNode("[1,2,3,4,5]");
 //        solution.rotateRight(listNode, 2);
-        solution.coinChange(new int[]{1, 2, 5}, 11);
+//        solution.coinChange(new int[]{1, 2, 5}, 11);
+        solution.findCircleNum(stringToMatrix(
+                "[[1,1,0,0,0,0,0,1,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,0,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,1,1,0,0,0,0],[0,0,0,1,0,1,0,0,0,0,1,0,0,0,0],[0,0,0,1,0,0,1,0,1,0,0,0,0,1,0],[1,0,0,0,0,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,0,0,0,0,1,0],[0,0,0,0,1,0,0,0,0,1,0,1,0,0,1],[0,0,0,0,1,1,0,0,0,0,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0,1,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,1,0,0,0,0,1]]"));
     }
 
 
@@ -1040,6 +1146,12 @@ public class Solution1 {
             for (int j = 0; j < split.length; j++) {
                 res[i][j] = Integer.parseInt(split[j]);
             }
+        }
+        for (final int[] re : res) {
+            for (final int i : re) {
+                System.out.print(i + " ");
+            }
+            System.out.println();
         }
         return res;
     }
