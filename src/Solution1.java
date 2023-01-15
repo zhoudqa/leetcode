@@ -1,7 +1,7 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Solution1 {
+public class Solution1 extends SolutionBase {
 
 
     public int numDifferentIntegers(String word) {
@@ -74,24 +74,6 @@ public class Solution1 {
             }
         }
         return smaller >= k;
-    }
-
-    static class ListNode {
-
-        int val;
-        ListNode next;
-
-        ListNode() {
-        }
-
-        ListNode(int val) {
-            this.val = val;
-        }
-
-        ListNode(int val, ListNode next) {
-            this.val = val;
-            this.next = next;
-        }
     }
 
     public ListNode mergeKLists(ListNode[] lists) {
@@ -213,16 +195,6 @@ public class Solution1 {
 
     }
 
-    static class TreeNode {
-
-        int val;
-        TreeNode left;
-        TreeNode right;
-
-        TreeNode(int x) {
-            val = x;
-        }
-    }
 
     static class Codec {
 
@@ -345,19 +317,6 @@ public class Solution1 {
         }
         return ret;
 
-    }
-
-    static class Node {
-
-        int val;
-        Node next;
-        Node random;
-
-        public Node(int val) {
-            this.val = val;
-            this.next = null;
-            this.random = null;
-        }
     }
 
     Map<Node, Node> cache = new HashMap<>();
@@ -1084,6 +1043,127 @@ public class Solution1 {
         return root;
     }
 
+    //给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。
+    //岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
+    //此外，你可以假设该网格的四条边均被水包围
+
+    public int numIslands(char[][] grid) {
+        int islandsCount = 0;
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
+                if (grid[i][j] == '1') {
+                    dfs(i, j, grid);
+                    islandsCount++;
+                }
+            }
+        }
+        return islandsCount;
+
+    }
+
+    private void dfs(int i, int j, char[][] grid) {
+        if (i == -1 || j == -1 || i == grid.length || j == grid[i].length) {
+            return;
+        }
+        if (grid[i][j] == '1') {
+            grid[i][j] = '0';//替代visited作用
+            dfs(i + 1, j, grid);
+            dfs(i, j + 1, grid);
+            dfs(i - 1, j, grid);
+            dfs(i, j - 1, grid);
+        }
+    }
+
+
+    //多源BFS
+    //https://leetcode.cn/problems/as-far-from-land-as-possible/
+    // 地图分析
+    public int maxDistance(int[][] grid) {
+        Queue<int[]> queue = new LinkedList<>();
+        final int n = grid.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    queue.add(new int[]{i, j});
+                }
+            }
+        }
+        if (queue.isEmpty() || queue.size() == n * n) {
+            //全是海洋或者陆地
+            return -1;
+        }
+        //BFS
+        int[][] moves = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        int distance = -1;
+        while (!queue.isEmpty()) {
+            distance++;//上下左右曼哈顿距离差为1
+            final int size = queue.size();
+            for (int k = 0; k < size; k++) {
+                //当前层内遍历，distance不变
+                final int[] poll = queue.poll();
+                for (final int[] move : moves) {
+                    int i = poll[0] + move[0];
+                    int j = poll[1] + move[1];
+                    if (i >= 0 && i < n && j >= 0 && j < n && grid[i][j] == 0) {
+                        //海洋标记visited
+                        grid[i][j] = 1;
+                        queue.add(new int[]{i, j});
+                    }
+                }
+            }
+        }
+        return distance;
+    }
+
+    //输入两棵二叉树A和B，判断B是不是A的子结构。(约定空树不是任意一个树的子结构)
+    //
+    //B是A的子结构， 即 A中有出现和B相同的结构和节点值。
+    public boolean isSubStructure(TreeNode A, TreeNode B) {
+        if (A == null || B == null) {
+            return false;
+        }
+        return isSub(A, B) || isSubStructure(A.left, B) || isSubStructure(A.right, B);
+    }
+
+    //A和B头开始匹配
+    private boolean isSub(TreeNode A, TreeNode B) {
+        //B对比到头了
+        if (B == null) {
+            return true;
+        }
+        //A没了
+        if (A == null) {
+            return false;
+        }
+        if (A.val != B.val) {
+            return false;
+        }
+        return isSub(A.left, B.left) && isSub(A.right, B.right);
+    }
+
+    //返回2个链表的第一个公共节点，未相交返回null
+    ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) {
+            return null;
+        }
+        ListNode point1 = headA;
+        ListNode point2 = headB;
+        //不相交这两个值遍历2遍后会同时为null
+        while (point1 != point2) {
+            if (point1 == null) {
+                point1 = headB;
+            } else {
+                point1 = point1.next;
+            }
+            if (point2 == null) {
+                point2 = headA;
+            } else {
+                point2 = point2.next;
+            }
+        }
+        return point1;
+    }
+
 
     public static void main(String[] args) {
         final Solution1 solution = new Solution1();
@@ -1108,52 +1188,13 @@ public class Solution1 {
 //        final ListNode listNode = stringToListNode("[1,2,3,4,5]");
 //        solution.rotateRight(listNode, 2);
 //        solution.coinChange(new int[]{1, 2, 5}, 11);
-        solution.findCircleNum(stringToMatrix(
-                "[[1,1,0,0,0,0,0,1,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,0,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,1,1,0,0,0,0],[0,0,0,1,0,1,0,0,0,0,1,0,0,0,0],[0,0,0,1,0,0,1,0,1,0,0,0,0,1,0],[1,0,0,0,0,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,0,0,0,0,1,0],[0,0,0,0,1,0,0,0,0,1,0,1,0,0,1],[0,0,0,0,1,1,0,0,0,0,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0,1,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,1,0,0,0,0,1]]"));
+//        solution.findCircleNum(stringToMatrix(
+//                "[[1,1,0,0,0,0,0,1,0,0,0,0,0,0,0],[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,1,0,1,1,0,0,0,0,0,0,0,0],[0,0,0,0,1,0,0,0,0,1,1,0,0,0,0],[0,0,0,1,0,1,0,0,0,0,1,0,0,0,0],[0,0,0,1,0,0,1,0,1,0,0,0,0,1,0],[1,0,0,0,0,0,0,1,1,0,0,0,0,0,0],[0,0,0,0,0,0,1,1,1,0,0,0,0,1,0],[0,0,0,0,1,0,0,0,0,1,0,1,0,0,1],[0,0,0,0,1,1,0,0,0,0,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0,1,0,0,0,0,1,0],[0,0,0,0,0,0,0,0,0,1,0,0,0,0,1]]"));
+//        solution.numIslands(
+//                new char[][]{{'1', '1', '1', '1', '0'}, {'1', '1', '0', '1', '0'}, {'1', '1', '0', '0', '0'},
+//                        {'0', '0', '0', '0', '0'}});
+        solution.isSubStructure(bfsBuild("[1,0,1,-4,-3]"), bfsBuild("[1,-4]"));
     }
 
-
-    public static ListNode stringToListNode(String s) {
-        final List<Integer> ints = Arrays.stream(s.substring(1, s.length() - 1).split(",")).map(Integer::parseInt)
-                .collect(Collectors.toList());
-        ListNode head = new ListNode(ints.get(0));
-        ListNode pre = head;
-        ListNode node;
-        for (int i = 1; i < ints.size(); i++) {
-            node = new ListNode(ints.get(i));
-            pre.next = node;
-            pre = node;
-        }
-        return head;
-    }
-
-    public static int[] stringToArray(String s) {
-        String[] split = s.substring(1, s.length() - 1).split(",");
-        int[] res = new int[split.length];
-        for (int i = 0; i < split.length; i++) {
-            res[i] = Integer.parseInt(split[i]);
-        }
-        return res;
-    }
-
-    public static int[][] stringToMatrix(String s) {
-        final String[] elements = s.substring(2, s.length() - 2).split("],\\[");
-        final int h = elements.length;
-        final int w = elements[0].split(",").length;
-        int[][] res = new int[h][w];
-        for (int i = 0; i < elements.length; i++) {
-            final String[] split = elements[i].split(",");
-            for (int j = 0; j < split.length; j++) {
-                res[i][j] = Integer.parseInt(split[j]);
-            }
-        }
-        for (final int[] re : res) {
-            for (final int i : re) {
-                System.out.print(i + " ");
-            }
-            System.out.println();
-        }
-        return res;
-    }
 
 }
