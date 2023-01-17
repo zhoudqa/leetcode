@@ -1,5 +1,4 @@
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Solution2 extends SolutionBase {
 
@@ -69,9 +68,69 @@ public class Solution2 extends SolutionBase {
 
     }
 
+    //将insertVal插入循环链表中
+    public Node insert(Node head, int insertVal) {
+        final Node insertNode = new Node(insertVal);
+        if (head == null) {
+            insertNode.next = insertNode;
+            return insertNode;
+        }
+        if (head.next == head) {
+            head.next = insertNode;
+            insertNode.next = head;
+            return head;
+        }
+        Node cur = head, next = head.next;
+        while (next != head) {
+            // 3->5->1   4
+            if (cur.val <= insertVal && next.val >= insertVal) {
+                break;
+            }
+            //1->2->3 4 || 1->3->5 0
+            //反例 3->4->1 2
+            if (cur.val > next.val && (insertVal > cur.val || insertVal < next.val)) {
+                break;
+            }
+            cur = next;
+            next = next.next;
+        }
+        cur.next = insertNode;
+        insertNode.next = next;
+        return head;
+    }
+
+    //将2个链表按低位相加
+    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        Deque<Integer> stack1 = new LinkedList<>();
+        Deque<Integer> stack2 = new LinkedList<>();
+        while (l1 != null) {
+            stack1.push(l1.val);
+            l1 = l1.next;
+        }
+        while (l2 != null) {
+            stack2.push(l2.val);
+            l2 = l2.next;
+        }
+        //保留进位
+        int jin = 0;
+        ListNode head = null;
+        while (!stack1.isEmpty() || !stack2.isEmpty() || jin != 0) {
+            int a = stack1.isEmpty() ? 0 : stack1.pop();
+            int b = stack2.isEmpty() ? 0 : stack2.pop();
+            int sum = a + b + jin;
+            jin = sum/10;
+            final ListNode cur = new ListNode(sum % 10);
+            cur.next = head;
+            head = cur;
+        }
+        return head;
+
+    }
+
     public static void main(String[] args) {
         final Solution2 solution = new Solution2();
-        solution.numSubarrayProductLessThanK(new int[]{10}, 2);
+//        solution.numSubarrayProductLessThanK(new int[]{10}, 2);
+        solution.addTwoNumbers(stringToListNode("[7,2,4,3]"),stringToListNode("[5,6,4]"));
     }
 
 }
