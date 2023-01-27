@@ -1,3 +1,4 @@
+import annotations.algorithm.DFS;
 import annotations.algorithm.DynamicPrograming;
 import annotations.algorithm.PrefixSum;
 import annotations.algorithm.SlidingWindow;
@@ -197,13 +198,144 @@ public class Solution2 extends SolutionBase {
         return res;
     }
 
+    /**
+     * 给你一个 无重复元素 的整数数组 candidates 和一个目标整数 target ，找出 candidates 中可以使数字和为目标数 target 的所有不同组合，
+     * 并以列表形式返回。你可以按 任意顺序返回这些组合。
+     * candidates 中的 同一个 数字可以 无限制重复被选取 。如果至少一个数字的被选数量不同，则两种组合是不同的。 <br/>
+     * <a href='https://leetcode.cn/problems/combination-sum/'>39. 组合总和</a>
+     */
+    @DFS
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (candidates.length == 0) {
+            return res;
+        }
+        dfs(candidates, 0, target, new LinkedList<>(), res);
+        return res;
+    }
+
+    /**
+     * @param candidates 树
+     * @param beginIndex 开始回溯的起点
+     * @param target 目标和
+     * @param path 当前路径
+     * @param res 结果集指针
+     */
+    private void dfs(int[] candidates, int beginIndex, int target, Deque<Integer> path, List<List<Integer>> res) {
+        if (target == 0) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = beginIndex; i < candidates.length; i++) {
+            final int candidate = candidates[i];
+            if (target < candidate) {
+                continue;
+            }
+            path.addLast(candidate);
+            dfs(candidates, i, target - candidate, path, res);
+            path.removeLast();
+        }
+    }
+
+    /**
+     * 给定一个候选人编号的集合 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。
+     * candidates 中的每个数字在每个组合中只能使用 一次 。<br/>
+     * <a href='https://leetcode.cn/problems/combination-sum-ii/'>40. 组合总和 II</a>
+     */
+    @DFS
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (candidates.length == 0) {
+            return res;
+        }
+        Arrays.sort(candidates);
+        dfs2(candidates, 0, target, new LinkedList<>(), res);
+        return res;
+    }
+
+    private void dfs2(int[] candidates, int beginIndex, int target, Deque<Integer> path,
+            List<List<Integer>> res) {
+
+        if (target == 0) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+        for (int i = beginIndex; i < candidates.length && target >= candidates[i]; i++) {
+            final int candidate = candidates[i];
+            if (i > beginIndex && candidates[i - 1] == candidates[i]) {
+                continue;
+            }
+            path.addLast(candidate);
+            dfs2(candidates, i + 1, target - candidate, path, res);
+            path.removeLast();
+        }
+    }
+
+    /**
+     * 给定一个二进制数组 nums , 找到含有相同数量的 0 和 1 的最长连续子数组，并返回该子数组的长度。 <br/>
+     * <a href='https://leetcode.cn/problems/A1NYOS/'>剑指 Offer II 011. 0 和 1 个数相同的子数组</a>
+     */
+    public int findMaxLength(int[] nums) {
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] == 0) {
+                nums[i] = -1;
+            }
+        }
+        int res = 0;
+        //问题转换为前缀和之差为0的两个坐标间隔最大的值，sum(i)==sum(j)
+        //key为前缀和，value为第一个出现该和的index
+        Map<Integer, Integer> sumMap = new HashMap<>();
+        //初始下标为-1，和为0，保证数组长度为1时解为0-(-1)=1
+        sumMap.put(0, -1);
+        int sum = 0;
+        for (int i = 0; i < nums.length; i++) {
+            sum += nums[i];
+            if (sumMap.containsKey(sum)) {
+                res = Math.max(res, i - sumMap.get(sum));
+            } else {
+                sumMap.put(sum, i);
+            }
+        }
+        return res;
+    }
+
+
+    /**
+     * 给定一个链表，删除链表的倒数第 n 个结点，并且返回链表的头结点。 <br/>
+     * <a href='https://leetcode.cn/problems/SLwz0R/'>剑指 Offer II 021. 删除链表的倒数第 n 个结点</a>
+     */
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode subHead = head;
+        ListNode subTail = head;
+        for (int i = 0; i < n; i++) {
+            subTail = subTail.next;
+        }
+        if (subTail == null) {
+            //删除头结点的情况
+            final ListNode next = head.next;
+            head.next = null;
+            return next;
+        }
+        while (subTail.next != null) {
+            subHead = subHead.next;
+            subTail = subTail.next;
+        }
+        final ListNode next = subHead.next;
+        final ListNode nextnext = next.next;
+        next.next = null;
+        subHead.next = nextnext;
+        return head;
+    }
+
 
     public static void main(String[] args) {
         final Solution2 solution = new Solution2();
 //        solution.numSubarrayProductLessThanK(new int[]{10}, 2);
 //        solution.addTwoNumbers(stringToListNode("[7,2,4,3]"), stringToListNode("[5,6,4]"));
 //        solution.subarraySum(stringToArray("[1,1,1]"), 2);
-        solution.countSubstrings("aba");
+//        solution.countSubstrings("aba");
+//        solution.combinationSum2(stringToArray("[10,1,2,7,6,1,5]"), 8);
+        solution.findMaxLength(stringToArray("[0,1,1,0,0,0,0,1,1,1,1]"));
     }
 
 }

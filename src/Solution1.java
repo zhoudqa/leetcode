@@ -1,3 +1,5 @@
+import annotations.algorithm.BFS;
+import annotations.algorithm.DFS;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -941,6 +943,7 @@ public class Solution1 extends SolutionBase {
 
     // 剑指 Offer II 116. 省份数量
     // 找出二阶nxn矩阵中互不相连的总块数
+    @DFS
     public int findCircleNum(int[][] isConnected) {
         int n = isConnected.length;
         boolean[] visited = new boolean[n];
@@ -964,6 +967,7 @@ public class Solution1 extends SolutionBase {
     }
 
     //给你二叉树的根节点 root 和一个整数目标和 target ，找出所有 从根节点到叶子节点 路径总和等于给定目标和的路径。
+    @DFS
     public List<List<Integer>> pathSum(TreeNode root, int target) {
         if (root == null) {
             return Collections.emptyList();
@@ -995,6 +999,7 @@ public class Solution1 extends SolutionBase {
 
     //给定两个整数 n 和 k，返回 1 ... n 中所有可能的 k 个数的组合。
     //n个数挑k个不同的数
+    @DFS
     public List<List<Integer>> combine(int n, int k) {
         List<List<Integer>> resList = new ArrayList<>();
         if (n == k) {
@@ -1046,7 +1051,7 @@ public class Solution1 extends SolutionBase {
     //给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。
     //岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
     //此外，你可以假设该网格的四条边均被水包围
-
+    @DFS
     public int numIslands(char[][] grid) {
         int islandsCount = 0;
         for (int i = 0; i < grid.length; i++) {
@@ -1078,6 +1083,7 @@ public class Solution1 extends SolutionBase {
     //多源BFS
     //https://leetcode.cn/problems/as-far-from-land-as-possible/
     // 地图分析
+    @BFS
     public int maxDistance(int[][] grid) {
         Queue<int[]> queue = new LinkedList<>();
         final int n = grid.length;

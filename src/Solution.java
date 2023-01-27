@@ -1,37 +1,8 @@
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Solution {
+public class Solution extends SolutionBase {
 
-    static class ListNode {
-
-        int val;
-        ListNode next;
-
-        ListNode(int x) {
-            val = x;
-        }
-    }
-
-    static class TreeNode {
-
-        int val;
-        TreeNode left;
-        TreeNode right;
-
-        TreeNode() {
-        }
-
-        TreeNode(int val) {
-            this.val = val;
-        }
-
-        TreeNode(int val, TreeNode left, TreeNode right) {
-            this.val = val;
-            this.left = left;
-            this.right = right;
-        }
-    }
 
     private static ListNode fromArray(int[] source) {
         ListNode next = null;
@@ -1308,6 +1279,43 @@ public class Solution {
                 path.removeLast();
                 System.out.println("递归之后 => " + path);
             }
+        }
+    }
+
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        int len = nums.length;
+        // 使用一个动态数组保存所有可能的全排列
+        List<List<Integer>> res = new ArrayList<>();
+        if (len == 0) {
+            return res;
+        }
+        Arrays.sort(nums);
+        boolean[] used = new boolean[len];
+        Deque<Integer> path = new ArrayDeque<>(len);
+
+        dfs2(nums, len, 0, path, used, res);
+        return res;
+    }
+
+    private void dfs2(int[] nums, int len, int depth,
+            Deque<Integer> path, boolean[] used,
+            List<List<Integer>> res) {
+        if (depth == len) {
+            res.add(new ArrayList<>(path));
+            return;
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (used[i] || (i > 0 && nums[i] == nums[i - 1] && !used[i - 1])) {
+                continue;
+            }
+            path.addLast(nums[i]);
+            used[i] = true;
+
+            dfs2(nums, len, depth + 1, path, used, res);
+
+            used[i] = false;
+            path.removeLast();
         }
     }
 
