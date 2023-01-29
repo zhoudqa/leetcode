@@ -1,7 +1,4 @@
-import annotations.algorithm.DFS;
-import annotations.algorithm.DynamicPrograming;
-import annotations.algorithm.PrefixSum;
-import annotations.algorithm.SlidingWindow;
+import annotations.algorithm.*;
 import annotations.level.Hard;
 import java.util.*;
 
@@ -205,6 +202,7 @@ public class Solution2 extends SolutionBase {
      * <a href='https://leetcode.cn/problems/combination-sum/'>39. 组合总和</a>
      */
     @DFS
+    @Backtrack
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
         List<List<Integer>> res = new ArrayList<>();
         if (candidates.length == 0) {
@@ -243,6 +241,7 @@ public class Solution2 extends SolutionBase {
      * <a href='https://leetcode.cn/problems/combination-sum-ii/'>40. 组合总和 II</a>
      */
     @DFS
+    @Backtrack
     public List<List<Integer>> combinationSum2(int[] candidates, int target) {
         List<List<Integer>> res = new ArrayList<>();
         if (candidates.length == 0) {
@@ -327,6 +326,252 @@ public class Solution2 extends SolutionBase {
         return head;
     }
 
+    /**
+     * 运用所掌握的数据结构，设计和实现一个  LRU (Least Recently Used，最近最少使用) 缓存机制 。 <br/>
+     * <a href='https://leetcode.cn/problems/OrIXps/'>剑指 Offer II 031. 最近最少使用缓存</a>
+     */
+    class LRUCache {
+
+
+        class LRUNode {
+
+            int key;
+            int value;
+            LRUNode pre;
+            LRUNode next;
+
+            public LRUNode(int key, int value) {
+                this.key = key;
+                this.value = value;
+            }
+
+            public LRUNode() {
+            }
+        }
+
+        private final int capacity;
+        private int size;
+        private final LRUNode dummyHead = new LRUNode();
+        private final LRUNode dummyTail = new LRUNode();
+        private final Map<Integer, LRUNode> map = new HashMap<>();
+
+        public LRUCache(int capacity) {
+            this.capacity = capacity;
+            this.size = 0;
+            dummyHead.next = dummyTail;
+            dummyTail.pre = dummyHead;
+        }
+
+        public int get(int key) {
+            if (!map.containsKey(key)) {
+                return -1;
+            }
+            final LRUNode node = map.get(key);
+            //删除节点
+            removeNode(node);
+            //添加到头结点
+            addToHead(node);
+            return node.value;
+        }
+
+        private void addToHead(LRUNode node) {
+            final LRUNode preHead = dummyHead.next;
+            dummyHead.next = node;
+            node.pre = dummyHead;
+            node.next = preHead;
+            preHead.pre = node;
+        }
+
+        private LRUNode removeNode(LRUNode node) {
+            node.pre.next = node.next;
+            node.next.pre = node.pre;
+            node.next = null;
+            node.pre = null;
+            return node;
+        }
+
+        private LRUNode removeTail() {
+            return removeNode(dummyTail.pre);
+        }
+
+        public void put(int key, int value) {
+            if (!map.containsKey(key)) {
+                //不存在
+                final LRUNode node = new LRUNode(key, value);
+                map.put(key, node);
+                addToHead(node);
+                size++;
+                if (size > capacity) {
+                    final LRUNode tail = removeTail();
+                    map.remove(tail.key);
+                    size--;
+                }
+            } else {
+                final LRUNode node = map.get(key);
+                node.value = value;
+                get(key);
+            }
+        }
+    }
+
+    /**
+     * 给定一个字符串数组 strs ，将 变位词 组合在一起。 可以按任意顺序返回结果列表。
+     * 注意：若两个字符串中每个字符出现的次数都相同，则称它们互为变位词。 <br/>
+     * <a href='https://leetcode.cn/problems/sfvd7V/'>剑指 Offer II 033. 变位词组</a>
+     */
+    public List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> map = new HashMap<>();
+        for (final String str : strs) {
+            int[] ints = new int[26];
+            for (int i = 0; i < str.length(); i++) {
+                ints[str.charAt(i) - 'a']++;
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 26; i++) {
+                if (ints[i] != 0) {
+                    //字母加个数
+                    sb.append((char) (i + 'a'));
+                    sb.append(ints[i]);
+                }
+            }
+            final String key = sb.toString();
+            map.putIfAbsent(key, new ArrayList<>());
+            map.get(key).add(str);
+        }
+        return new ArrayList<>(map.values());
+    }
+
+    /**
+     * 完全二叉树插入<br/>
+     * <a href='https://leetcode.cn/problems/NaqhDT/'>剑指 Offer II 043. 往完全二叉树添加节点</a>
+     */
+    @BFS
+    static class CBTInserter {
+
+        private final TreeNode root;
+        private int size;
+        private int level;
+
+        public CBTInserter(TreeNode root) {
+            this.root = root;
+            bfs(root);
+        }
+
+        private void bfs(TreeNode root) {
+            //统计个数和层数
+            Deque<TreeNode> deque = new LinkedList<>();
+            deque.add(root);
+            while (!deque.isEmpty()) {
+                level++;
+                final int n = deque.size();
+                size += n;
+                for (int i = 0; i < n; i++) {
+                    final TreeNode poll = deque.poll();
+                    if (poll.left != null) {
+                        deque.addLast(poll.left);
+                    }
+                    if (poll.right != null) {
+                        deque.addLast(poll.right);
+                    }
+                }
+            }
+        }
+
+        public int insert(int v) {
+            final TreeNode newNode = new TreeNode(v);
+            if (size == ((int) (Math.pow(2, level) - 1))) {
+                //长高
+                TreeNode parent = root;
+                while (parent.left != null) {
+                    parent = parent.left;
+                }
+                parent.left = newNode;
+                size++;
+                level++;
+                return parent.val;
+            } else {
+                size++;
+                return insert(root, 1, newNode);
+            }
+        }
+
+        private Integer insert(TreeNode node, int nodeLevel, TreeNode newNode) {
+            if (nodeLevel == level) {
+                //边叶子节点
+                return null;
+            }
+            if (node.left == null) {
+                node.left = newNode;
+                return node.val;
+            } else if (node.right == null) {
+                node.right = newNode;
+                return node.val;
+            } else {
+                final Integer leftInsert = insert(node.left, nodeLevel + 1, newNode);
+                if (leftInsert == null) {
+                    return insert(node.right, nodeLevel + 1, newNode);
+                } else {
+                    return leftInsert;
+                }
+            }
+        }
+
+
+        public TreeNode get_root() {
+            return root;
+        }
+    }
+
+
+    /**
+     * 给定两个字符串 text1 和 text2，返回这两个字符串的最长 公共子序列 的长度。如果不存在 公共子序列 ，返回 0 。<br/>
+     * 一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。<br/>
+     * 例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。<br/>
+     * 两个字符串的 公共子序列 是这两个字符串所共同拥有的子序列。 <br/>
+     * <a href='https://leetcode.cn/problems/qJnOS7/description/'>剑指 Offer II 095. 最长公共子序列</a>
+     */
+    @DynamicPrograming
+    public int longestCommonSubsequence(String text1, String text2) {
+        //dp(i,j)标识text1前i位和text2前j位的最长公共子序列
+        //dp(0,0)=0；当text[j-1]!=text[i-1]时，dp(i,j)为dp[i-1][j]和的dp[i][j-1]中较大的值，否则为dp[i-1][j-1]+1
+        int[][] dp = new int[text1.length() + 1][text2.length() + 1];
+        for (int i = 1; i <= text1.length(); i++) {
+            for (int j = 1; j <= text2.length(); j++) {
+                dp[i][j] = text1.charAt(i - 1) == text2.charAt(j - 1) ? dp[i - 1][j - 1] + 1
+                        : Math.max(dp[i][j - 1], dp[i - 1][j]);
+            }
+        }
+        return dp[text1.length()][text2.length()];
+    }
+
+    /**
+     * 正整数 n 代表生成括号的对数，请设计一个函数，用于能够生成所有可能的并且 有效的 括号组合。<br/>
+     * <a href='https://leetcode.cn/problems/IDBivT/'>剑指 Offer II 085. 生成匹配的括号</a>
+     */
+    @Backtrack
+    public List<String> generateParenthesis(int n) {
+        List<String> res = new ArrayList<>();
+        backtrack(res, new StringBuilder(), 0, 0, n);
+        return res;
+    }
+
+    private void backtrack(List<String> res, StringBuilder sb, int left, int right, int n) {
+        if (sb.length() == n << 1) {
+            res.add(sb.toString());
+            return;
+        }
+        if (left < n) {
+            sb.append('(');
+            backtrack(res, sb, left + 1, right, n);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        if (right < left) {
+            sb.append(')');
+            backtrack(res, sb, left, right + 1, n);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+    }
+
 
     public static void main(String[] args) {
         final Solution2 solution = new Solution2();
@@ -335,7 +580,13 @@ public class Solution2 extends SolutionBase {
 //        solution.subarraySum(stringToArray("[1,1,1]"), 2);
 //        solution.countSubstrings("aba");
 //        solution.combinationSum2(stringToArray("[10,1,2,7,6,1,5]"), 8);
-        solution.findMaxLength(stringToArray("[0,1,1,0,0,0,0,1,1,1,1]"));
+//        solution.findMaxLength(stringToArray("[0,1,1,0,0,0,0,1,1,1,1]"));
+//        solution.groupAnagrams(new String[]{"eat", "tea", "tan", "ate", "nat", "bat"});
+//        final CBTInserter insert = new CBTInserter(bfsBuild("[1,2,3,4,5,6]"));
+//        insert.insert(7);
+//        insert.insert(8);
+        solution.generateParenthesis(4);
+
     }
 
 }
