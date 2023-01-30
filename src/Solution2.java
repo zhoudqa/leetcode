@@ -572,6 +572,60 @@ public class Solution2 extends SolutionBase {
         }
     }
 
+    /**
+     * 给定一个由 0 和 1 组成的非空二维数组 grid ，用来表示海洋岛屿地图。<br/>
+     * 一个 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在水平或者竖直方向上相邻。<br/>
+     * 你可以假设 grid 的四个边缘都被 0（代表水）包围着。<br/>
+     * 找到给定的二维数组中最大的岛屿面积。如果没有岛屿，则返回面积为 0 。<br/>
+     * <a href='https://leetcode.cn/problems/ZL6zAn/'>剑指 Offer II 105. 岛屿的最大面积</a>
+     */
+    public int maxAreaOfIsland(int[][] grid) {
+        int res = 0;
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == 1) {
+                    res = Math.max(dfs(i, j, grid), res);
+                }
+            }
+        }
+        return res;
+    }
+
+    private int dfs(int i, int j, int[][] grid) {
+        if (i < 0 || j < 0 || i >= grid.length || j >= grid[0].length || grid[i][j] != 1) {
+            return 0;
+        }
+        int area = 1;
+        grid[i][j] = 0;//visited标记
+        area += dfs(i + 1, j, grid);
+        area += dfs(i - 1, j, grid);
+        area += dfs(i, j + 1, grid);
+        area += dfs(i, j - 1, grid);
+        return area;
+    }
+
+    /**
+     * 给定一个由 不同 正整数组成的数组 nums ，和一个目标整数 target 。请从 nums 中找出并返回总和为 target 的元素组合的个数。
+     * 数组中的数字可以在一次排列中出现任意次，但是顺序不同的序列被视作不同的组合。<br/>
+     * 题目数据保证答案符合 32 位整数范围。<br/>
+     * <a href='https://leetcode.cn/problems/D0F0SV/'>剑指 Offer II 104. 排列的数目</a>
+     */
+    @DynamicPrograming
+    public int combinationSum4(int[] nums, int target) {
+        //dp(i)为和为i的组合总数 dp(i)=∑dp(i-num)
+        int[] dp = new int[target + 1];
+        dp[0] = 1;
+        for (int i = 1; i < target + 1; i++) {
+            for (final int num : nums) {
+                if (num <= i) {
+                    //加上选取num的情况
+                    dp[i] += dp[i - num];
+                }
+            }
+        }
+        return dp[target];
+    }
+
 
     public static void main(String[] args) {
         final Solution2 solution = new Solution2();
@@ -585,7 +639,9 @@ public class Solution2 extends SolutionBase {
 //        final CBTInserter insert = new CBTInserter(bfsBuild("[1,2,3,4,5,6]"));
 //        insert.insert(7);
 //        insert.insert(8);
-        solution.generateParenthesis(4);
+//        solution.generateParenthesis(4);
+//        solution.maxAreaOfIsland(stringToMatrix("[[1,1,0,0,0],[1,1,0,0,0],[0,0,0,1,1],[0,0,0,1,1]]"));
+        solution.combinationSum4(stringToArray("[1,2,3]"), 4);
 
     }
 
