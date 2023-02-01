@@ -555,6 +555,29 @@ public class Solution2 extends SolutionBase {
         return res;
     }
 
+    @DynamicPrograming
+    public List<String> generateParenthesisDP(int n) {
+        if (n == 0) {
+            return Collections.emptyList();
+        }
+        Map<Integer, List<String>> dp = new HashMap<>();
+        final List<String> noneQuote = Collections.singletonList("");
+        dp.put(1, Collections.singletonList("()"));
+        for (int i = 2; i <= n; i++) {
+            dp.put(i, new ArrayList<>());
+            for (int j = 0; j < i; j++) {
+                final List<String> inners = dp.getOrDefault(j, noneQuote);
+                final List<String> outers = dp.getOrDefault(i - 1 - j, noneQuote);
+                for (final String inner : inners) {
+                    for (final String outer : outers) {
+                        dp.get(i).add("(" + inner + ")" + outer);
+                    }
+                }
+            }
+        }
+        return dp.get(n);
+    }
+
     private void backtrack(List<String> res, StringBuilder sb, int left, int right, int n) {
         if (sb.length() == n << 1) {
             res.add(sb.toString());
@@ -626,6 +649,103 @@ public class Solution2 extends SolutionBase {
         return dp[target];
     }
 
+    /**
+     * 解码方法总数<br/>
+     * <a href='https://leetcode.cn/problems/decode-ways/'>91. 解码方法</a>
+     */
+    @DynamicPrograming
+    public int numDecodings(String s) {
+        final int len = s.length();
+        //dp(i)表示s的前i个字符的解码方法数，dp(0)=1，即空字符串可以有1种解码方法，解码出一个空字符串。
+        int[] dp = new int[len + 1];
+        dp[0] = 1;
+        for (int i = 1; i <= len; i++) {
+            if (s.charAt(i - 1) != '0') {
+                dp[i] += dp[i - 1];
+            }
+            if (i > 1 && s.charAt(i - 2) != '0' && Integer.parseInt(s.substring(i - 2, i)) <= 26) {
+                dp[i] += dp[i - 2];
+            }
+        }
+        return dp[len];
+    }
+
+    /**
+     * 给定一个数组 prices ，它的第 i 个元素 prices[i] 表示一支给定股票第 i 天的价格。<br/>
+     * 你只能选择 某一天 买入这只股票，并选择在 未来的某一个不同的日子 卖出该股票。设计一个算法来计算你所能获取的最大利润。<br/>
+     * 返回你可以从这笔交易中获取的最大利润。如果你不能获取任何利润，返回 0 。<br/>
+     * <a href='https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/description/'>121. 买卖股票的最佳时机</a>
+     */
+    @DynamicPrograming
+    public int maxProfit(int[] prices) {
+        //dp[day][max_hand][has_stock]表示在第day天，至今交易hand手，手上(has_stock)有股票的情况获得的最大利润
+        //dp[day][max_hand][0]=max(dp[day-1][hand][0], dp[day-1][hand][1] + prices[day]),手上有没有股票可能是前一天没有今天没买卖或者前一天有今天卖出了，取较大值
+        //dp[day][max_hand][1]=max(dp[day-1][hand][1], dp[day-1][hand-1][0] - prices[day])，手上有股票可能是前一天有今天没有买卖，或者前一天没有今天买入了
+        //dp[0][max_hand][0]=0,dp[0][max_hand][1]=-price[0]
+        int dpi0 = 0, dpi1 = Integer.MIN_VALUE;
+        for (int i = 0; i < prices.length; i++) {
+            dpi0 = Math.max(dpi0, dpi1 + prices[i]);
+            //max_hand==0时，dp[day-1][0][0]一定是0，代表昨天交易0手不能交易
+            dpi1 = Math.max(dpi1, -prices[i]);
+        }
+        //最后一天手里不持有股票的利润最高
+        return dpi0;
+    }
+
+    /**
+     * 给定两个以升序排列的整数数组 nums1 和 nums2 , 以及一个整数 k 。<br/>
+     * 定义一对值 (u,v)，其中第一个元素来自 nums1，第二个元素来自 nums2 。<br/>
+     * 请找到和最小的 k 个数对 (u1,v1),  (u2,v2)  ...  (uk,vk) 。<br/>
+     * <a href='https://leetcode.cn/problems/qn8gGX/'>剑指 Offer II 061. 和最小的 k 个数对</a>
+     */
+    public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+        PriorityQueue<List<Integer>> pq = new PriorityQueue<>(Comparator.comparingInt(o -> o.get(0) + o.get(1)));
+        for (final int num1 : nums1) {
+            for (final int num2 : nums2) {
+                pq.add(Arrays.asList(num1, num2));
+            }
+        }
+        List<List<Integer>> res = new ArrayList<>();
+        while (!pq.isEmpty() && --k != 0) {
+            res.add(pq.poll());
+        }
+        return res;
+
+    }
+
+    /**
+     * 剑指 Offer II 073. 狒狒吃香蕉<br/>
+     * <a href='https://leetcode.cn/problems/nZZqjQ/description/'>剑指 Offer II 073. 狒狒吃香蕉</a>
+     */
+    public int minEatingSpeed(int[] piles, int h) {
+        int low = 1, high = 1;
+        for (final int pile : piles) {
+            //一个小时最多吃掉的香蕉
+            high = Math.max(high, pile);
+        }
+        int res = low;
+        while (low < high) {
+            int mid = (low + high) / 2;
+            final int time = eatTime(piles, mid);
+            if (time <= h) {
+                //吃快了，结果只能在这里面，先记录再继续二分
+                res = mid;
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        return res;
+    }
+
+    private int eatTime(int[] piles, int speed) {
+        int time = 0;
+        for (final int pile : piles) {
+            time += (pile + speed - 1) / speed;
+        }
+        return time;
+    }
+
 
     public static void main(String[] args) {
         final Solution2 solution = new Solution2();
@@ -639,9 +759,10 @@ public class Solution2 extends SolutionBase {
 //        final CBTInserter insert = new CBTInserter(bfsBuild("[1,2,3,4,5,6]"));
 //        insert.insert(7);
 //        insert.insert(8);
-//        solution.generateParenthesis(4);
+//        solution.generateParenthesisDP(3);
 //        solution.maxAreaOfIsland(stringToMatrix("[[1,1,0,0,0],[1,1,0,0,0],[0,0,0,1,1],[0,0,0,1,1]]"));
-        solution.combinationSum4(stringToArray("[1,2,3]"), 4);
+//        solution.combinationSum4(stringToArray("[1,2,3]"), 4);
+        solution.minEatingSpeed(stringToArray("[3,6,7,11]"), 8);
 
     }
 
