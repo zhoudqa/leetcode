@@ -258,7 +258,7 @@ public class Solution1 extends SolutionBase {
     private int longestSubstring(String s, int left, int right, int k) {
         int[] count = new int[26];
         for (int i = left; i <= right; i++) {
-            count[s.charAt(i) - 'a']++;
+            count[distance(s.charAt(i))]++;
         }
         int split = -1;
         for (int i = 0; i < 26; i++) {
@@ -275,12 +275,12 @@ public class Solution1 extends SolutionBase {
         int ret = Integer.MIN_VALUE;
         //从left到right比较每一个使用split分隔的子串
         while (i <= right) {
-            while (i <= right && s.charAt(i) - 'a' == split) {
+            while (i <= right && distance(s.charAt(i)) == split) {
                 i++;
             }
             //第一个不为split的index
             int newLeft = i;
-            while (i <= right && s.charAt(i) - 'a' != split) {
+            while (i <= right && distance(s.charAt(i)) != split) {
                 i++;
             }
             //第一个split的index
@@ -707,7 +707,7 @@ public class Solution1 extends SolutionBase {
             //remain指到达下一个点之后剩余的油
             int step = 0;
             int remain = 0;
-            //尝试找到第一个到不了的点
+            //尝试找到最远到达的点
             while (step < len) {
                 int j = (i + step) % len;
                 remain += gas[j] - cost[j];
@@ -733,26 +733,30 @@ public class Solution1 extends SolutionBase {
         final char[] chars = s.toCharArray();
         final int len = chars.length;
         for (int i = 0; i < len; i++) {
-            lastIndex[chars[i] - 'a'] = i;
+            lastIndex[distance(chars[i])] = i;
         }
         boolean[] visited = new boolean[26];
         Deque<Character> stack = new ArrayDeque<>();
         for (int i = 0; i < len; i++) {
-            if (visited[chars[i] - 'a']) {
+            if (visited[distance(chars[i])]) {
                 //在栈中的元素已经是最小字典序了
                 continue;
             }
             //字典序更小的且栈顶元素后面还有，则去掉栈顶元素让字典序更小的入栈
             char peekChar;
-            while (!stack.isEmpty() && (peekChar = stack.peekLast()) > chars[i] && lastIndex[peekChar - 'a'] > i) {
-                visited[stack.removeLast() - 'a'] = false;
+            while (!stack.isEmpty() && (peekChar = stack.peekLast()) > chars[i] && lastIndex[distance(peekChar)] > i) {
+                visited[distance(stack.removeLast())] = false;
             }
             stack.offerLast(chars[i]);
-            visited[chars[i] - 'a'] = true;
+            visited[distance(chars[i])] = true;
         }
         StringBuilder sb = new StringBuilder();
         stack.forEach(sb::append);
         return sb.toString();
+    }
+
+    private int distance(char peekChar) {
+        return peekChar - 'a';
     }
 
     //给你一个整数 n ，请你生成并返回所有由 n 个节点组成且节点值从 1 到 n 互不相同的不同 二叉搜索树 。可以按 任意顺序 返回答案。
