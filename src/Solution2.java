@@ -1,5 +1,12 @@
-import annotations.algorithm.*;
+import annotations.algorithm.BFS;
+import annotations.algorithm.Backtrack;
+import annotations.algorithm.DFS;
+import annotations.algorithm.DynamicPrograming;
+import annotations.algorithm.PrefixSum;
+import annotations.algorithm.SlidingWindow;
 import annotations.level.Hard;
+import annotations.level.Medium;
+
 import java.util.*;
 
 public class Solution2 extends SolutionBase {
@@ -215,20 +222,17 @@ public class Solution2 extends SolutionBase {
     /**
      * @param candidates 树
      * @param beginIndex 开始回溯的起点
-     * @param target 目标和
-     * @param path 当前路径
-     * @param res 结果集指针
+     * @param target     目标和
+     * @param path       当前路径
+     * @param res        结果集指针
      */
     private void dfs(int[] candidates, int beginIndex, int target, Deque<Integer> path, List<List<Integer>> res) {
         if (target == 0) {
             res.add(new ArrayList<>(path));
             return;
         }
-        for (int i = beginIndex; i < candidates.length; i++) {
+        for (int i = beginIndex; i < candidates.length && target >= candidates[i]; i++) {
             final int candidate = candidates[i];
-            if (target < candidate) {
-                continue;
-            }
             path.addLast(candidate);
             dfs(candidates, i, target - candidate, path, res);
             path.removeLast();
@@ -253,7 +257,7 @@ public class Solution2 extends SolutionBase {
     }
 
     private void dfs2(int[] candidates, int beginIndex, int target, Deque<Integer> path,
-            List<List<Integer>> res) {
+                      List<List<Integer>> res) {
 
         if (target == 0) {
             res.add(new ArrayList<>(path));
@@ -261,6 +265,7 @@ public class Solution2 extends SolutionBase {
         }
         for (int i = beginIndex; i < candidates.length && target >= candidates[i]; i++) {
             final int candidate = candidates[i];
+            //排序完一样的数可以略过
             if (i > beginIndex && candidates[i - 1] == candidates[i]) {
                 continue;
             }
@@ -555,6 +560,23 @@ public class Solution2 extends SolutionBase {
         return res;
     }
 
+    private void backtrack(List<String> res, StringBuilder sb, int left, int right, int n) {
+        if (sb.length() == n * 2) {
+            res.add(sb.toString());
+            return;
+        }
+        if (left < n) {
+            sb.append('(');
+            backtrack(res, sb, left + 1, right, n);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        if (right < left) {
+            sb.append(')');
+            backtrack(res, sb, left, right + 1, n);
+            sb.deleteCharAt(sb.length() - 1);
+        }
+    }
+
     @DynamicPrograming
     public List<String> generateParenthesisDP(int n) {
         if (n == 0) {
@@ -578,22 +600,6 @@ public class Solution2 extends SolutionBase {
         return dp.get(n);
     }
 
-    private void backtrack(List<String> res, StringBuilder sb, int left, int right, int n) {
-        if (sb.length() == n << 1) {
-            res.add(sb.toString());
-            return;
-        }
-        if (left < n) {
-            sb.append('(');
-            backtrack(res, sb, left + 1, right, n);
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        if (right < left) {
-            sb.append(')');
-            backtrack(res, sb, left, right + 1, n);
-            sb.deleteCharAt(sb.length() - 1);
-        }
-    }
 
     /**
      * 给定一个由 0 和 1 组成的非空二维数组 grid ，用来表示海洋岛屿地图。<br/>
@@ -653,6 +659,7 @@ public class Solution2 extends SolutionBase {
      * 解码方法总数<br/>
      * <a href='https://leetcode.cn/problems/decode-ways/'>91. 解码方法</a>
      */
+    @Medium
     @DynamicPrograming
     public int numDecodings(String s) {
         final int len = s.length();
@@ -677,6 +684,7 @@ public class Solution2 extends SolutionBase {
      * <a href='https://leetcode.cn/problems/best-time-to-buy-and-sell-stock/description/'>121. 买卖股票的最佳时机</a>
      */
     @DynamicPrograming
+    @Medium
     public int maxProfit(int[] prices) {
         //dp[day][max_hand][has_stock]表示在第day天，至今交易hand手，手上(has_stock)有股票的情况获得的最大利润
         //dp[day][max_hand][0]=max(dp[day-1][hand][0], dp[day-1][hand][1] + prices[day]),手上有没有股票可能是前一天没有今天没买卖或者前一天有今天卖出了，取较大值
@@ -763,6 +771,7 @@ public class Solution2 extends SolutionBase {
 //        solution.maxAreaOfIsland(stringToMatrix("[[1,1,0,0,0],[1,1,0,0,0],[0,0,0,1,1],[0,0,0,1,1]]"));
 //        solution.combinationSum4(stringToArray("[1,2,3]"), 4);
         solution.minEatingSpeed(stringToArray("[3,6,7,11]"), 8);
+        solution.generateParenthesis(3);
 
     }
 

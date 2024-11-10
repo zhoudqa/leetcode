@@ -1,5 +1,7 @@
 import annotations.algorithm.BFS;
 import annotations.algorithm.DFS;
+import annotations.level.Medium;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -151,10 +153,10 @@ public class Solution1 extends SolutionBase {
         for (int num : nums) {
             frequencyMap.put(num, frequencyMap.getOrDefault(num, 0) + 1);
         }
-        //维护大小为k的最小堆
+        //维护大小为k的最小堆，空间复杂度为O(1)
         PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(o -> o[1]));
         frequencyMap.forEach((val, frequency) -> {
-            //频率比最小的还低，就不需要入堆了，保证堆的大小为k
+            //在最小堆里，前K高频率的就是不断淘汰top1小的
             if (pq.size() == k) {
                 if (pq.peek()[1] < frequency) {
                     pq.poll();
@@ -547,6 +549,7 @@ public class Solution1 extends SolutionBase {
     //给定一个非负整数数组 nums ，你最初位于数组的 第一个下标 。
     //数组中的每个元素代表你在该位置可以跳跃的最大长度。
     //返回可以跳到最后一个最后一个坐标的最小跳跃数
+    @Medium
     public int jump(int[] nums) {
         int[] minSteps = new int[nums.length];
         for (int i = 1; i < nums.length; i++) {
@@ -565,15 +568,15 @@ public class Solution1 extends SolutionBase {
 
     public int jumpBest(int[] nums) {
         int steps = 0;
-        int maxPos = 0;
-        int curStepEnd = 0;
+        int maxPosOfThisOneStep = 0;
+        int nextPos = 0;
         //不访问最后的节点，nums[nums.length-1]一定用不上
         for (int i = 0; i < nums.length - 1; i++) {
             //当前step最远可以到的距离
-            maxPos = Math.max(maxPos, i + nums[i]);
-            if (i == curStepEnd) {
+            maxPosOfThisOneStep = Math.max(maxPosOfThisOneStep, i + nums[i]);
+            if (i == nextPos) {
                 //更新当前step可以走到的最远距离
-                curStepEnd = maxPos;
+                nextPos = maxPosOfThisOneStep;
                 //进入下次跳跃
                 steps++;
             }
@@ -624,6 +627,7 @@ public class Solution1 extends SolutionBase {
 
     //给你一个长度为 n 的整数数组 nums 和 一个目标值 target。请你从 nums 中选出三个整数，使它们的和与 target 最接近。
     //返回这三个数的和。
+    @Medium
     public int threeSumClosest(int[] nums, int target) {
         Arrays.sort(nums);
         int res = nums[0] + nums[1] + nums[2];
@@ -667,6 +671,7 @@ public class Solution1 extends SolutionBase {
     //在一条环路上有 n 个加油站，其中第 i 个加油站有汽油 gas[i] 升。
     //你有一辆油箱容量无限的的汽车，从第 i 个加油站开往第 i+1 个加油站需要消耗汽油 cost[i] 升。你从其中的一个加油站出发，开始时油箱为空。
     //给定两个整数数组 gas 和 cost ，如果你可以绕环路行驶一周，则返回出发时加油站的编号，否则返回 -1 。如果存在解，则 保证 它是 唯一 的。
+    @Medium
     public int canCompleteCircuit(int[] gas, int[] cost) {
         final int length = gas.length;
         int[] remain = new int[length];//记录到下一个站剩余的油量
@@ -793,6 +798,7 @@ public class Solution1 extends SolutionBase {
     }
 
     //给你一个链表的头节点 head ，旋转链表，将链表每个节点向右移动 k 个位置。
+    @Medium
     public ListNode rotateRight(ListNode head, int k) {
         if (head == null) {
             return null;
@@ -822,12 +828,13 @@ public class Solution1 extends SolutionBase {
     }
 
     //给你二叉树的根节点 root ，返回其节点值 自底向上的层序遍历 。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+    @Medium
     public List<List<Integer>> levelOrderBottom(TreeNode root) {
         if (root == null) {
             return Collections.emptyList();
         }
         List<List<Integer>> res = new ArrayList<>();
-        Deque<TreeNode> deque = new ArrayDeque<>();
+        Deque<TreeNode> deque = new LinkedList<>();
         deque.addFirst(root);
         while (!deque.isEmpty()) {
             int levelSize = deque.size();
@@ -1204,6 +1211,7 @@ public class Solution1 extends SolutionBase {
 //                new char[][]{{'1', '1', '1', '1', '0'}, {'1', '1', '0', '1', '0'}, {'1', '1', '0', '0', '0'},
 //                        {'0', '0', '0', '0', '0'}});
         solution.isSubStructure(bfsBuild("[1,0,1,-4,-3]"), bfsBuild("[1,-4]"));
+        solution.jumpBest(new int[]{2,3,1,1,4});
     }
 
 
