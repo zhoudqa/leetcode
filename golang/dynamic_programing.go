@@ -1,6 +1,9 @@
 package golang
 
-import "sort"
+import (
+	"math"
+	"sort"
+)
 
 //😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭动态规划😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭//
 
@@ -131,4 +134,216 @@ func minDistance(word1 string, word2 string) int {
 		}
 	}
 	return f[len1][len2]
+}
+
+// 给定两个单词 word1 和 word2 ，返回使得 word1 和  word2 相同所需的最小步数。
+//
+// 每步 可以删除任意一个字符串中的一个字符。
+func minDistanceDel(word1 string, word2 string) int {
+	n := len(word1)
+	m := len(word2)
+	f := make([][]int, n+1)
+	f[0] = make([]int, m+1)
+	for i := 1; i < m+1; i++ {
+		f[0][i] = i
+	}
+	for i := 1; i < n+1; i++ {
+		f[i] = make([]int, m+1)
+		f[i][0] = i
+	}
+	f[0][0] = 0
+	for i := 1; i <= n; i++ {
+		for j := 1; j <= m; j++ {
+			if word1[i-1] == word2[j-1] {
+				f[i][j] = f[i-1][j-1]
+			} else {
+				f[i][j] = min(f[i-1][j]+1, f[i][j-1]+1, f[i-1][j-1]+2)
+			}
+		}
+	}
+	return f[n][m]
+}
+
+// 给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。
+//
+// 子序列 是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。
+func lengthOfLIS(nums []int) int {
+	//g[i]代表包含nums[i]的最长的子序列
+	g := make([]int, 0)
+	for _, num := range nums {
+		firstGTNumIndex := sort.SearchInts(g, num)
+		if firstGTNumIndex == len(g) {
+			//不存在比num小的，可以继续增加g
+			g = append(g, num)
+		} else {
+			//替换对应的位置，仅仅代表增加了这个数后最大长度还是原来的长度
+			g[firstGTNumIndex] = num
+		}
+	}
+	return len(g)
+}
+
+// 给你一个整数数组 nums 。nums 的每个元素是 1，2 或 3。在每次操作中，你可以删除 nums 中的一个元素。返回使 nums 成为 非递减 顺序所需操作数的 最小值。
+func minimumOperations(nums []int) int {
+	//g[i]代表加入nums[i]后的最长序列
+	g := make([]int, 0)
+	for _, x := range nums {
+		firstNumIndex := sort.Search(len(g), func(i int) bool {
+			return g[i] > x
+		})
+		if firstNumIndex == len(g) {
+			g = append(g, x)
+		} else {
+			g[firstNumIndex] = x
+		}
+	}
+	return len(nums) - len(g)
+
+}
+
+//😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭动态规划-区间😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭//
+
+// 给你一个字符串 s ，找出其中最长的回文子序列，并返回该序列的长度。
+// 子序列定义为：不改变剩余字符顺序的情况下，删除某些字符或者不删除任何字符形成的一个序列。
+func longestPalindromeSubseq(s string) int {
+	//dp[i,j]表示s[i,j]的子序列中最长子序列长度，dp[i,i]=1
+	n := len(s)
+	cache := makeMatrixWithInitialFunc(n, n, func(i, j int) int {
+		if i == j {
+			return 1
+		}
+		return -1
+	})
+	var dfs func(i, j int) int
+	dfs = func(i, j int) int {
+		if i > j {
+			return 0
+		}
+		if cache[i][j] != -1 {
+			return cache[i][j]
+		}
+		var res int
+		defer func() {
+			cache[i][j] = res
+		}()
+		if s[i] == s[j] {
+			res = dfs(i+1, j-1) + 2
+		} else {
+			res = max(dfs(i+1, j), dfs(i, j-1))
+		}
+		return res
+	}
+	return dfs(0, n-1)
+}
+
+func longestPalindromeSubseqRet(s string) int {
+	n := len(s)
+	f := makeMatrixWithInitialFunc[int](n, n, nil)
+	//i从i+1来，j从j-1来，所以一个倒序一个正序，且初始状态一定是f[i][i] 所以j必须从i+1开始枚举
+	for i := n - 1; i >= 0; i-- {
+		f[i][i] = 1
+		for j := i + 1; j < n; j++ {
+			if s[i] == s[j] {
+				f[i][j] = f[i+1][j-1] + 2
+			} else {
+				f[i][j] = max(f[i+1][j], f[i][j-1])
+			}
+		}
+	}
+	return f[0][n-1]
+}
+
+func makeMatrixWithInitialFunc[T comparable](length, width int, initFunc func(i, j int) T) [][]T {
+	cache := make([][]T, width)
+	for i := 0; i < width; i++ {
+		cache[i] = make([]T, length)
+		if initFunc != nil {
+			for j := range cache[i] {
+				cache[i][j] = initFunc(i, j)
+			}
+		}
+	}
+	return cache
+}
+
+// 给你一个字符串 s，请你将 s 分割成一些子串，使每个子串都是
+// 回文串
+// 返回符合要求的 最少分割次数 。
+func minCut(s string) int {
+	n := len(s)
+	f := make([]int, n+1)
+	for i := range f {
+		f[i] = math.MaxInt32
+	}
+	f[0] = -1
+	//缓存从i,j是否回文的信息
+	cache := makeMatrixWithInitialFunc[*bool](n, n, nil)
+	for i := 0; i < n; i++ {
+		for k := i; k >= 0; k-- {
+			if isPalindromeFunc(s, k, i, cache) {
+				f[i+1] = min(f[i+1], 1+f[k])
+			}
+		}
+	}
+	return f[n]
+}
+
+func minCutMemo(s string) int {
+	n := len(s)
+	//dfs搜索以i结尾的s最少分割数，dfs[0]=0，代表一个字符就是回文不需要分割
+	var dfs func(i int) int
+	isPalindrome := func(l, r int) bool {
+		for l < r {
+			if s[l] != s[r] {
+				return false
+			}
+			l++
+			r--
+		}
+		return true
+	}
+	memo := make([]int, n)
+
+	for i := 1; i < n; i++ {
+		memo[i] = -1
+	}
+	dfs = func(i int) int {
+		if i < 0 {
+			//因为下面遍历dfs(j)的时候可能会小于0，所以保证dfs(0)=dfs(-1)+1即dfs(-1)=-1
+			return -1
+		}
+		if memo[i] != -1 {
+			return memo[i]
+		}
+		//min需要初始化为inf
+		memo[i] = math.MaxInt32
+		for j := i; j >= 0; j-- {
+			if isPalindrome(j, i) {
+				memo[i] = min(memo[i], 1+dfs(j-1))
+			}
+		}
+		return memo[i]
+	}
+	return dfs(n - 1)
+}
+
+func Ptr[T any](a T) *T {
+	return &a
+}
+
+func isPalindromeFunc(s string, l, r int, cache [][]*bool) (ret bool) {
+	if cache[l][r] != nil {
+		return *cache[l][r]
+	}
+	defer func() {
+		cache[l][r] = Ptr(ret)
+	}()
+	for l < r {
+		if s[l] != s[r] {
+			return false
+		}
+		l++
+		r--
+	}
+	return true
 }
