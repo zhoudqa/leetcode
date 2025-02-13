@@ -254,9 +254,9 @@ func longestPalindromeSubseqRet(s string) int {
 }
 
 func makeMatrixWithInitialFunc[T comparable](length, width int, initFunc func(i, j int) T) [][]T {
-	cache := make([][]T, width)
-	for i := 0; i < width; i++ {
-		cache[i] = make([]T, length)
+	cache := make([][]T, length)
+	for i := 0; i < length; i++ {
+		cache[i] = make([]T, width)
 		if initFunc != nil {
 			for j := range cache[i] {
 				cache[i][j] = initFunc(i, j)
@@ -346,4 +346,51 @@ func isPalindromeFunc(s string, l, r int, cache [][]*bool) (ret bool) {
 		r--
 	}
 	return true
+}
+
+//给定两个字符串 text1 和 text2，返回这两个字符串的最长 公共子序列 的长度。如果不存在 公共子序列 ，返回 0 。
+//
+//一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
+
+// 例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。
+// 两个字符串的 公共子序列 是这两个字符串所共同拥有的子序列。
+func longestCommonSubsequence(text1 string, text2 string) int {
+	//dp[i,j]代表text1的前i位和text2的前j位的最长公共子序列 dp[0,0]为0
+	cache := makeMatrixWithInitialFunc(len(text1)+1, len(text2)+1, func(i, j int) int {
+		if i == 0 || j == 0 {
+			return 0
+		}
+		return -1
+	})
+	var dfs func(i, j int) int
+	dfs = func(i, j int) int {
+		if cache[i][j] == -1 {
+			if text1[i-1] == text2[j-1] {
+				cache[i][j] = dfs(i-1, j-1) + 1
+			} else {
+				cache[i][j] = max(dfs(i, j-1), dfs(i-1, j))
+			}
+		}
+		return cache[i][j]
+	}
+	return dfs(len(text1), len(text2))
+}
+func longestCommonSubsequenceRet(text1 string, text2 string) int {
+	m := len(text1)
+	n := len(text2)
+	f := make([][]int, m+1)
+	for i := 0; i <= m; i++ {
+		f[i] = make([]int, n+1)
+	}
+
+	for i := 1; i <= m; i++ {
+		for j := 1; j <= n; j++ {
+			if text1[i-1] == text2[j-1] {
+				f[i][j] = f[i-1][j-1] + 1
+			} else {
+				f[i][j] = max(f[i][j-1], f[i-1][j])
+			}
+		}
+	}
+	return f[m][n]
 }
