@@ -2,7 +2,9 @@ package golang
 
 import (
 	"math"
+	"slices"
 	"sort"
+	"strings"
 )
 
 //😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭动态规划😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭//
@@ -253,19 +255,6 @@ func longestPalindromeSubseqRet(s string) int {
 	return f[0][n-1]
 }
 
-func makeMatrixWithInitialFunc[T comparable](length, width int, initFunc func(i, j int) T) [][]T {
-	cache := make([][]T, length)
-	for i := 0; i < length; i++ {
-		cache[i] = make([]T, width)
-		if initFunc != nil {
-			for j := range cache[i] {
-				cache[i][j] = initFunc(i, j)
-			}
-		}
-	}
-	return cache
-}
-
 // 给你一个字符串 s，请你将 s 分割成一些子串，使每个子串都是
 // 回文串
 // 返回符合要求的 最少分割次数 。
@@ -393,4 +382,386 @@ func longestCommonSubsequenceRet(text1 string, text2 string) int {
 		}
 	}
 	return f[m][n]
+}
+
+// https://leetcode.cn/problems/taking-maximum-energy-from-the-mystic-dungeon/
+// 在神秘的地牢中，n 个魔法师站成一排。每个魔法师都拥有一个属性，这个属性可以给你提供能量。有些魔法师可能会给你负能量，即从你身上吸取能量。
+// 你被施加了一种诅咒，当你从魔法师 i 处吸收能量后，你将被立即传送到魔法师 (i + k) 处。这一过程将重复进行，直到你到达一个不存在 (i + k) 的魔法师为止。
+// 换句话说，你将选择一个起点，然后以 k 为间隔跳跃，直到到达魔法师序列的末端，在过程中吸收所有的能量。
+// 给定一个数组 energy 和一个整数k，返回你能获得的 最大 能量。
+func maximumEnergy(energy []int, k int) int {
+	//遍历n-1到n-k，计算这几个结尾的最大值
+	n := len(energy)
+	suffixSum := make([]int, k)
+	ans := math.MinInt
+	for j := 1; j <= k; j++ {
+		for i := n - j; i >= 0; i -= k {
+			suffixSum[j-1] += energy[i]
+			ans = max(ans, suffixSum[j-1])
+		}
+	}
+	return ans
+}
+
+// https://leetcode.cn/problems/maximum-difference-score-in-a-grid/description/?slug=maximum-difference-score-in-a-grid&region=local_v2
+// 给你一个由 正整数 组成、大小为 m x n 的矩阵 grid。你可以从矩阵中的任一单元格移动到另一个位于正下方或正右侧的任意单元格（不必相邻）。从值为 c1 的单元格移动到值为 c2 的单元格的得分为 c2 - c1 。
+// 你可以从 任一 单元格开始，并且必须至少移动一次。
+// 返回你能得到的 最大 总得分。
+func maxScore(grid [][]int) int {
+	// f[i+1][j+1]代表[0][0]到[i][j]构成的矩形中的最小值
+	m := len(grid)
+	n := len(grid[0])
+	ans := math.MinInt
+	f := makeMatrixWithInitialFunc(m+1, n+1, func(i, j int) int {
+		return math.MaxInt
+	})
+	for i, row := range grid {
+		for j, v := range row {
+			//假如以当前格子为终点的话，那只要找到左上的最小值，就可以得到最大结果了，中间如何移动都会被抵消掉
+			upLeftMin := min(f[i][j+1], f[i+1][j])
+			ans = max(ans, v-upLeftMin)
+			f[i+1][j+1] = min(v, upLeftMin)
+		}
+	}
+	return ans
+}
+
+// https://leetcode.cn/problems/climbing-stairs/
+func climbStairs(n int) int {
+	var dfs func(i int) int
+	var cache = make([]int, n)
+	for i := range cache {
+		cache[i] = -1
+	}
+	dfs = func(i int) (r int) {
+		if i < 2 {
+			return 1
+		}
+		if cache[i-1] > 0 {
+			return cache[i-1]
+		} else {
+			defer func() {
+				cache[i-1] = r
+			}()
+		}
+		return dfs(i-1) + dfs(i-2)
+	}
+	return dfs(n)
+}
+
+func climbStairsIter(n int) int {
+	f0 := 1
+	f1 := 1
+	for i := 2; i <= n; i++ {
+		f := f0 + f1
+		f0 = f1
+		f1 = f
+	}
+	return f1
+}
+
+// https://leetcode.cn/problems/min-cost-climbing-stairs/description/
+// 给你一个整数数组 cost ，其中 cost[i] 是从楼梯第 i 个台阶向上爬需要支付的费用。一旦你支付此费用，即可选择向上爬一个或者两个台阶。
+// 你可以选择从下标为 0 或下标为 1 的台阶开始爬楼梯。
+// 请你计算并返回达到楼梯顶部的最低花费。
+func minCostClimbingStairs(cost []int) int {
+	n := len(cost)
+	cache := makeCacheWithInitialFunc(n, func(i int) int {
+		return -1
+	})
+	var dfs func(i int) int
+	dfs = func(i int) (r int) {
+		if i < 2 {
+			return 0
+		}
+		if cache[i] >= 0 {
+			return cache[i]
+		} else {
+			defer func() {
+				cache[i] = r
+			}()
+		}
+		return min(dfs(i-1)+cost[i-1], dfs(i-2)+cost[i-2])
+	}
+	return dfs(n)
+}
+
+func minCostClimbingStairsIter(cost []int) int {
+	var f0, f1 int
+	n := len(cost)
+	for i := 2; i <= n; i++ {
+		//只和前面2个的状态有关系，i-2跳2步上来或者i-1跳一步上来
+		f := min(f0+cost[i-2], f1+cost[i-1])
+		f0 = f1
+		f1 = f
+	}
+	return f1
+}
+
+// https://leetcode.cn/problems/count-ways-to-build-good-strings/description/
+// 给你整数 zero ，one ，low 和 high ，我们从空字符串开始构造一个字符串，每一步执行下面操作中的一种：
+// 将 '0' 在字符串末尾添加 zero  次。
+// 将 '1' 在字符串末尾添加 one 次。
+// 以上操作可以执行任意次。
+// 如果通过以上过程得到一个 长度 在 low 和 high 之间（包含上下边界）的字符串，那么这个字符串我们称为 好 字符串。
+// 请你返回满足以上要求的 不同 好字符串数目。由于答案可能很大，请将结果对 109 + 7 取余 后返回。
+func countGoodStrings(low int, high int, zero int, one int) int {
+	mod := 1_000_000_007
+	var dfs func(l int) int
+	cache := makeCacheWithInitialFunc(high+1, func(i int) int {
+		return -1
+	})
+	//长度为l时的组合数
+	dfs = func(l int) (r int) {
+		if l < 0 {
+			return 0
+		}
+		//空串的方法数为1
+		if l == 0 {
+			return 1
+		}
+		c := &cache[l-1]
+		if *c < 0 {
+			*c = (dfs(l-zero) + dfs(l-one)) % mod
+		}
+		return *c
+	}
+	ans := 0
+	for l := low; l <= high; l++ {
+		ans += dfs(l)
+	}
+	return ans % mod
+}
+
+func countGoodStringsIter(low int, high int, zero int, one int) int {
+	mod := 1_000_000_007
+	f := make([]int, high+1) //f[i]表示构造长度为i的方案数
+	f[0] = 1
+	ans := 0
+	for l := 1; l <= high; l++ {
+		if l >= zero {
+			f[l] += f[l-zero]
+		}
+		if l >= one {
+			f[l] = (f[l] + f[l-one]) % mod
+		}
+		if l >= low {
+			ans = (ans + f[l]) % mod
+		}
+	}
+	return ans % mod
+}
+
+// https://leetcode.cn/problems/combination-sum-iv/description/
+// 给你一个由 不同 整数组成的数组 nums ，和一个目标整数 target 。请你从 nums 中找出并返回总和为 target 的元素组合的个数。
+// 题目数据保证答案符合 32 位整数范围。
+func combinationSum4(nums []int, target int) int {
+	sort.Ints(nums)
+	//dfs 代表总和为t的组合个数
+	var dfs func(t int) int
+	cache := makeCacheWithInitialFunc(target+1, func(i int) int {
+		return -1
+	})
+	dfs = func(t int) (r int) {
+		if t < 0 {
+			return 0
+		}
+		if t == 0 {
+			return 1
+		}
+		if cache[t] != -1 {
+			return cache[t]
+		} else {
+			defer func() {
+				cache[t] = r
+			}()
+		}
+		for _, n := range nums {
+			if t >= n {
+				r += dfs(t - n)
+			}
+		}
+		return
+	}
+	return dfs(target)
+}
+
+// https://leetcode.cn/problems/count-number-of-texts/description/
+
+const mod = 1_000_000_007
+
+// 测试长度上限
+const mx = 100_001
+
+// 重复字符为3个可能性长度为i的时候的结果
+var f = [mx]int{1, 1, 2, 4}
+
+// 重复字符为4个可能性长度为i的时候的结果
+var g = f
+
+func init() {
+	for i := 4; i < mx; i++ {
+		f[i] = (f[i-1] + f[i-2] + f[i-3]) % mod
+		g[i] = (g[i-1] + g[i-2] + g[i-3] + g[i-4]) % mod
+	}
+}
+
+func countTexts(s string) int {
+	ans, cnt := 1, 0
+	for i, c := range s {
+		cnt++
+		//直到不重复，计算当前重复
+		if i == len(s)-1 || byte(c) != s[i+1] {
+			if c != '7' && c != '9' {
+				ans = ans * f[cnt] % mod
+			} else {
+				ans = ans * g[cnt] % mod
+			}
+			cnt = 0
+		}
+	}
+	return ans
+}
+
+func countTextsMySelf(s string) int {
+	cache3 := make(map[int]int)
+	cache4 := make(map[int]int)
+	var chainedChars []string
+	sb := strings.Builder{}
+	n := len(s)
+	for i, c := range s {
+		sb.WriteByte(s[i])
+		if i+1 != n && byte(c) != s[i+1] {
+			sb.WriteByte(',')
+		}
+	}
+	chainedChars = strings.Split(sb.String(), ",")
+
+	var dfs func(l int, c uint8) int
+	dfs = func(l int, c uint8) (r int) {
+		if l < 0 {
+			return 0
+		}
+		var ch map[int]int
+		hit3 := c != '7' && c != '9'
+		if hit3 {
+			ch = cache3
+		} else {
+			ch = cache4
+		}
+		if cache3[l] != 0 {
+			return cache3[l]
+		}
+		defer func() {
+			ch[l] = r
+		}()
+		if l == 0 || l == 1 {
+			return 1
+		}
+		if l == 2 {
+			return 2
+		}
+		if l == 3 {
+			return 4
+		}
+		if hit3 {
+			return (dfs(l-1, c) + dfs(l-2, c) + dfs(l-3, c)) % mod
+		} else {
+			return (dfs(l-1, c) + dfs(l-2, c) + dfs(l-3, c) + dfs(l-4, c)) % mod
+		}
+	}
+	var ans = 1
+	for _, chainedChar := range chainedChars {
+		ans = (ans * dfs(len(chainedChar), chainedChar[0])) % mod
+	}
+	return ans
+}
+
+// https://leetcode.cn/problems/delete-and-earn/description/
+// 给你一个整数数组 nums ，你可以对它进行一些操作。
+// 每次操作中，选择任意一个 nums[i] ，删除它并获得 nums[i] 的点数。之后，你必须删除 所有 等于 nums[i] - 1 和 nums[i] + 1 的元素。
+// 开始你拥有 0 个点数。返回你能通过这些操作获得的最大点数。
+func deleteAndEarn(nums []int) int {
+	l := slices.Max(nums)
+	//ints[i]代表nums中所有值为i的总和，比如[2,2,3,3,3,4,4]对应的就是[0,0,4,9,8]，那么限制就变成了打家劫舍
+	ints := make([]int, l)
+	for _, n := range nums {
+		ints[n] += n
+	}
+	var f0, f1 int
+	for i := 0; i < l; i++ {
+		f0, f1 = f1, max(f1, f0+ints[i])
+	}
+	return f1
+}
+
+// https://leetcode.cn/problems/count-number-of-ways-to-place-houses/
+func countHousePlacements(n int) int {
+	mod := 1_000_000_007
+	f0 := 1 //相邻2块都没有放
+	f1 := 2 //相邻2块放了1块
+	f2 := 1 //相邻2块放了2块
+	for i := 2; i <= n; i++ {
+		newF0 := (f0 + f1 + f2) % mod
+		newF1 := (f0*2 + f1) % mod
+		newF2 := f0
+		f0 = newF0
+		f1 = newF1
+		f2 = newF2
+	}
+	return (f0 + f1 + f2) % mod
+}
+
+// https://leetcode.cn/problems/maximum-subarray/description/
+// 给你一个整数数组 nums ，请你找出一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+func maxSubArray(nums []int) int {
+	ans := math.MinInt
+	//f[i]代表以nums[i]结尾的连续子数组最大和
+	f := nums[0]
+	for i, n := range nums {
+		if i > 0 {
+			f = max(n, n+f)
+		}
+		ans = max(ans, f)
+	}
+	return ans
+}
+
+// https://leetcode.cn/problems/find-the-substring-with-maximum-cost/
+func maximumCostSubstring(s string, chars string, vals []int) int {
+	//当前前缀和-最小前缀和=最大
+	preSum := 0
+	minPreSum := 0
+	ans := math.MinInt
+	costMap := map[int]int{}
+	for i, c := range chars {
+		costMap[int(c)] = vals[i]
+	}
+	cost := func(c int, costMap map[int]int) int {
+		if v, ok := costMap[c]; ok {
+			return v
+		} else {
+			return c - 96
+		}
+	}
+	for _, c := range s {
+		preSum += cost(int(c), costMap)
+		minPreSum = min(minPreSum, preSum)
+		ans = max(ans, preSum-minPreSum)
+	}
+	return ans
+}
+
+// https://leetcode.cn/problems/maximum-product-subarray/description/
+// 给你一个整数数组 nums ，请你找出数组中乘积最大的非空连续 子数组 （该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
+func maxProduct(nums []int) int {
+	maxProd := 1 //包含当前元素的最大积
+	minProd := 1 //包含当前元素的最小积
+	ans := math.MinInt
+	for _, n := range nums {
+		//不用管正负，比大小即可
+		maxProd, minProd = max(maxProd*n, n, minProd*n), min(maxProd*n, n, minProd*n)
+		ans = max(ans, maxProd)
+	}
+	return ans
 }

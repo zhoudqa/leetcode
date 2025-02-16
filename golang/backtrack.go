@@ -185,3 +185,30 @@ func generateParenthesis(n int) []string {
 	backtrack(0, 0)
 	return ans
 }
+
+// 给定一个不含重复数字的数组 nums ，返回其 所有可能的全排列 。你可以 按任意顺序 返回答案。
+func permute(nums []int) [][]int {
+	n := len(nums)
+	var ans [][]int
+	path := make([]int, n)
+	onPath := make([]bool, n)
+	var backtrack func(i int)
+	backtrack = func(i int) {
+		if i == n {
+			temp := make([]int, n)
+			copy(temp, path)
+			ans = append(ans, temp)
+			return
+		}
+		for j, on := range onPath {
+			if !on {
+				path[i] = nums[j]
+				onPath[j] = true
+				backtrack(i + 1)
+				onPath[j] = false
+			}
+		}
+	}
+	backtrack(0)
+	return ans
+}

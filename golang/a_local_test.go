@@ -1,7 +1,10 @@
 package golang
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestLC(t *testing.T) {
-	println(rearrangeCharacters("loonbalxballpoonballoo", "balloon"))
+	r := maxProduct([]int{2, 3, -2, -5})
+	println(r)
 }

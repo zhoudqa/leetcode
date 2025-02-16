@@ -1,6 +1,9 @@
 package golang
 
-import "slices"
+import (
+	"math"
+	"slices"
+)
 
 // 😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭二分查找😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭//
 
@@ -181,4 +184,38 @@ func findPeakGrid(mat [][]int) []int {
 	}
 	return []int{right, findMaxIndex(mat[right])}
 
+}
+
+// 给你一个整数数组 start 和一个整数 d，代表 n 个区间 [start[i], start[i] + d]。
+// 你需要选择 n 个整数，其中第 i 个整数必须属于第 i 个区间。所选整数的 得分 定义为所选整数两两之间的 最小 绝对差。
+// 返回所选整数的 最大可能得分 。
+// https://leetcode.cn/problems/maximize-score-of-numbers-in-ranges/description/
+func maxPossibleScore(start []int, d int) int {
+	//找到一个得分，为最大的满足条件的得分，如果要满足最小绝对差最大，那么俩俩之间的绝对差都得相等，也即是这里的score
+	slices.Sort(start)
+	n := len(start)
+	isBlue := func(starts []int, score int) bool {
+		prex := math.MinInt
+		for _, start := range starts {
+			//前面的start加上得分比当前的右区间大，不符合条件
+			lastX := prex + score
+			if lastX > start+d {
+				return false
+			}
+			prex = max(start, lastX)
+		}
+		return true
+	}
+	//得分为0肯定是满足条件的，但是不是最大得分，右区间的边界要满足 score <= (s[n-1]+d-s[0])/(n-1)
+	//这里取开区间，left+1=right时为空区间
+	left, right := -1, (start[n-1]+d-start[0])/(n-1)+1
+	for left+1 < right {
+		mid := (left + right) / 2
+		if isBlue(start, mid) {
+			left = mid
+		} else {
+			right = mid
+		}
+	}
+	return left
 }
