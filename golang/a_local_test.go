@@ -5,6 +5,6 @@ import (
 )
 
 func TestLC(t *testing.T) {
-	r := maxProduct([]int{2, 3, -2, -5})
+	r := maximumTotalDamage([]int{7, 1, 6, 3})
 	println(r)
 }

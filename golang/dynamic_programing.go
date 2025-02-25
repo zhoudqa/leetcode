@@ -403,6 +403,48 @@ func maximumEnergy(energy []int, k int) int {
 	return ans
 }
 
+// https://leetcode.cn/problems/maximum-total-damage-with-spell-casting/description/
+// 给你一个数组 power ，其中每个元素表示一个咒语的伤害值，可能会有多个咒语有相同的伤害值。
+// 已知魔法师使用伤害值为 power[i] 的咒语时，他们就 不能 使用伤害为 power[i] - 2 ，power[i] - 1 ，power[i] + 1 或者 power[i] + 2 的咒语。
+// 每个咒语最多只能被使用 一次 。
+// 请你返回这个魔法师可以达到的伤害值之和的 最大值 。
+func maximumTotalDamage(power []int) int64 {
+	xCnt := make(map[int]int)
+	for _, x := range power {
+		xCnt[x]++
+	}
+	var a []int
+	for x := range xCnt {
+		a = append(a, x)
+	}
+	slices.Sort(a)
+	// [7,1,6,6] -> a:[1,6,7]+m:{1:1,6:2,7:1}，循环的时候就可以判断遍历到当前元素的时候，前一个结果能不能用（a[j]<a[i]-2，dfs(j)就可以用）
+	n := len(a)
+	// xCnt记录每个int出现的次数，a记录有序的元素列表
+	var dfs func(i int) int
+	cache := makeCacheWithInitialFunc(n+1, func(i int) int {
+		return -1
+	})
+	dfs = func(i int) int {
+		if i < 0 {
+			return 0
+		}
+		c := &cache[i]
+		if *c != -1 {
+			return *c
+		}
+		j := i
+		x := a[i]
+		//找到比当前遍历x小2以上的第一个下标，如果选了当前x数，则总和为dfs(j)+x*cnt[x]
+		for j-1 > 0 && a[j-1] >= x-2 {
+			j--
+		}
+		*c = max(dfs(i-1), dfs(j)+x*xCnt[x])
+		return *c
+	}
+	return int64(dfs(n - 1))
+}
+
 // https://leetcode.cn/problems/maximum-difference-score-in-a-grid/description/?slug=maximum-difference-score-in-a-grid&region=local_v2
 // 给你一个由 正整数 组成、大小为 m x n 的矩阵 grid。你可以从矩阵中的任一单元格移动到另一个位于正下方或正右侧的任意单元格（不必相邻）。从值为 c1 的单元格移动到值为 c2 的单元格的得分为 c2 - c1 。
 // 你可以从 任一 单元格开始，并且必须至少移动一次。
@@ -762,6 +804,168 @@ func maxProduct(nums []int) int {
 		//不用管正负，比大小即可
 		maxProd, minProd = max(maxProd*n, n, minProd*n), min(maxProd*n, n, minProd*n)
 		ans = max(ans, maxProd)
+	}
+	return ans
+}
+
+// https://leetcode.cn/problems/minimum-path-sum/description/
+// 给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+//
+// 说明：每次只能向下或者向右移动一步。
+func minPathSum(grid [][]int) int {
+	n := len(grid)
+	m := len(grid[0])
+	cache := makeMatrixWithInitialFunc[int](n, m, nil)
+	for i := 0; i < n; i++ {
+		for j := 0; j < m; j++ {
+			cache[i][j] = grid[i][j]
+			addition := math.MaxInt
+			if i-1 >= 0 {
+				addition = min(addition, cache[i-1][j])
+			}
+			if j-1 >= 0 {
+				addition = min(addition, cache[i][j-1])
+			}
+			if addition != math.MaxInt {
+				cache[i][j] += addition
+			}
+		}
+	}
+	return cache[n][m]
+
+}
+
+// https://leetcode.cn/problems/unique-paths/description/
+// 一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为 “Start” ）。
+// 机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
+// 问总共有多少条不同的路径？
+func uniquePaths(m int, n int) int {
+	cache := make([]int, n)
+	for i := 0; i < n; i++ {
+		//第一层初始化为1
+		cache[i] = 1
+	}
+	for i := 1; i < m; i++ {
+		var f int
+		for j := 0; j < n; j++ {
+			//左边+上方的
+			f += cache[j]
+			cache[j] = f
+		}
+	}
+	return cache[n-1]
+}
+
+// https://leetcode.cn/problems/maximum-non-negative-product-in-a-matrix/description/
+// 给你一个大小为 m x n 的矩阵 grid 。最初，你位于左上角 (0, 0) ，每一步，你可以在矩阵中 向右 或 向下 移动。
+// 在从左上角 (0, 0) 开始到右下角 (m - 1, n - 1) 结束的所有路径中，找出具有 最大非负积 的路径。路径的积是沿路径访问的单元格中所有整数的乘积。
+// 返回 最大非负积 对 109 + 7 取余 的结果。如果最大积为 负数 ，则返回 -1 。
+// 注意，取余是在得到最大积之后执行的。
+func maxProductPath(grid [][]int) int {
+	mod := 1_000_000_007
+	n := len(grid[0])
+	m := len(grid)
+	//缓存上一行的max积和min积
+	maxCache := make([]int, n)
+	minCache := make([]int, n)
+	prod := 1
+	for i := 0; i < n; i++ {
+		prod = (prod * grid[0][i]) % mod
+		maxCache[i] = prod
+		minCache[i] = prod
+	}
+	for i := 1; i < m; i++ {
+		maxP, minP := 1, 1
+		for j := 0; j < n; j++ {
+			x := grid[i][j]
+
+			c := (x * maxCache[j]) % mod
+			d := (x * minCache[j]) % mod
+			//非第一列的需要和左边和上面乘对比
+			if j > 0 {
+				a := (x * maxP) % mod
+				b := (x * minP) % mod
+				maxP, minP = max(a, b, c, d), min(a, b, c, d)
+			} else {
+				maxP, minP = max(c, d), min(c, d)
+			}
+			maxCache[j], minCache[j] = maxP, minP
+		}
+	}
+	ans := maxCache[n-1]
+	if ans < 0 {
+		return -1
+	}
+	return ans
+}
+
+// https://leetcode.cn/problems/find-the-maximum-number-of-fruits-collected/description/
+func maxCollectedFruits(fruits [][]int) int {
+	n := len(fruits)
+	var ans int
+	cache := makeMatrixWithInitialFunc(n, n, func(i, j int) int {
+		return -1
+	})
+	// 右上角的不能穿过对角线，否则回不到右下角，左下角同理，因此就是计算右上角不触碰对角线的情况，到达右下角的最大和
+	var dfs func(i, j int) int
+	dfs = func(i, j int) (r int) {
+		// i+j >= n-1条件来自于即使一直从右上角往下走，也不会超过右上角到左下角的对角线
+		if j < n-1-i || j >= n {
+			return math.MinInt
+		}
+		if i == 0 {
+			return fruits[i][j]
+		}
+		if cache[i][j] != -1 {
+			return cache[i][j]
+		}
+		defer func() {
+			cache[i][j] = r
+		}()
+		//从n-2,n-1倒推的好处，天然限定了只会在对角线右边枚举
+		return fruits[i][j] + max(dfs(i-1, j-1), dfs(i-1, j), dfs(i-1, j+1))
+	}
+	ans += dfs(n-2, n-1)
+	for i, row := range fruits {
+		//对角线的和
+		ans += row[i]
+	}
+	for i := range fruits {
+		for j := i + 1; j < n; j++ {
+			fruits[i][j] = fruits[j][i]
+		}
+	}
+	cache = makeMatrixWithInitialFunc(n, n, func(i, j int) int {
+		return -1
+	})
+	return ans + dfs(n-2, n-1)
+}
+
+// https://leetcode.cn/problems/minimum-falling-path-sum/description/
+// 给你一个 n x n 的 方形 整数数组 matrix ，请你找出并返回通过 matrix 的下降路径 的 最小和 。
+func minFallingPathSum(matrix [][]int) int {
+	n := len(matrix)
+	cachePre := make([]int, n)
+	cacheCur := make([]int, n)
+	ans := 0
+	for i := 0; i < n; i++ {
+		rowMin := math.MaxInt
+		for j, x := range matrix[i] {
+			addition := 0
+			if i > 0 {
+				addition = cachePre[j]
+				if j-1 >= 0 {
+					addition = min(cachePre[j-1], addition)
+				}
+				if j+1 < n {
+					addition = min(cachePre[j+1], addition)
+				}
+			}
+			cacheCur[j] = addition + x
+			rowMin = min(cacheCur[j], rowMin)
+		}
+		copy(cachePre, cacheCur)
+		ans = rowMin
 	}
 	return ans
 }
