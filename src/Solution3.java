@@ -262,4 +262,69 @@ public class Solution3 extends SolutionBase {
         }
         return -1;
     }
+
+    //https://leetcode.cn/problems/decode-ways/
+    // 数字解码字母组合数，[1->'A',2->'B'...26->'Z']
+    public int numDecodings(String s) {
+        int n = s.length();
+        int mod = 3;
+        int[] f = new int[mod];
+        s = " " + s;
+        f[0] = 1;
+        //转移方程 f[i] = f[i-1]+f[i-2],a∈[1,9],b∈[10,26];f[i]=f[i-2],b∈[10,26];f[i]=f[i-1],a∈[1,9]
+        for (int i = 1; i < n + 1; i++) {
+            f[i % mod] = 0;
+            int cur = s.charAt(i) - '0';
+            int preAndCur = (s.charAt(i - 1) - '0') * 10 + cur;
+            boolean aLegal = 1 <= cur && cur <= 9;
+            boolean bLegal = 10 <= preAndCur && preAndCur <= 26;
+            if (aLegal && bLegal) {
+                f[i % mod] = f[(i - 1) % mod] + f[(i - 2) % mod];
+            } else if (bLegal) {
+                f[i % mod] = f[(i - 2) % mod];
+            } else if (aLegal) {
+                f[i % mod] = f[(i - 1) % mod];
+            }
+
+        }
+        return f[n % mod];
+    }
+
+    //https://leetcode.cn/problems/maximal-square/description/
+    //在一个由 '0' 和 '1' 组成的二维矩阵内，找到只包含 '1' 的最大正方形，并返回其面积。
+    public int maximalSquare(char[][] matrix) {
+        //f[i][j] = g[i][j]=='0'?0:(1+min(f[i-1,j],f[i,j-1])
+        int m = matrix.length;
+        int n = matrix[0].length;
+        int[] f = new int[n];
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            ans = Math.max(ans, f[i] = matrix[0][i] == '0' ? 0 : 1);
+        }
+        for (int i = 1; i < m; i++) {
+            int left = matrix[i][0] == '0' ? 0 : 1;
+            ans = Math.max(ans, left);
+            for (int j = 1; j < n; j++) {
+                int cur;
+                if (matrix[i][j] == '0') {
+                    cur = 0;
+                } else {
+                    cur = 1;
+                    int minLen = Math.min(left, f[j]);
+                    if (minLen > 0) {
+                        if (matrix[i - minLen][j - minLen] == '1') {
+                            cur += minLen;
+                        } else {
+                            cur += minLen - 1;
+                        }
+                    }
+                }
+                f[j] = cur;
+                left = cur;
+                ans = Math.max(ans, cur);
+
+            }
+        }
+        return ans * ans;
+    }
 }

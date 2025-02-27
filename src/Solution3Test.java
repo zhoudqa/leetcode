@@ -1,5 +1,6 @@
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class Solution3Test {
 
@@ -8,8 +9,8 @@ class Solution3Test {
     @Test
     void findMaxForm() {
         Solution3 solution3 = new Solution3();
-        Assertions.assertEquals(4, solution3.findMaxFormBest(new String[]{"10", "0001", "111001", "1", "0"}, 5, 3));
-        Assertions.assertEquals(2, solution3.findMaxFormBest(new String[]{"10", "0", "1"}, 1, 1));
+        assertEquals(4, solution3.findMaxFormBest(new String[]{"10", "0001", "111001", "1", "0"}, 5, 3));
+        assertEquals(2, solution3.findMaxFormBest(new String[]{"10", "0", "1"}, 1, 1));
     }
 
     @Test
@@ -26,11 +27,26 @@ class Solution3Test {
 
     @Test
     void search() {
-        Assertions.assertEquals(0, instance.search(new int[]{5, 1, 3}, 5));
+        assertEquals(0, instance.search(new int[]{5, 1, 3}, 5));
     }
 
     @Test
     void findMin() {
-        Assertions.assertEquals(0, instance.findMin(new int[]{4, 5, 6, 7, 0, 1, 2}));
+        assertEquals(0, instance.findMin(new int[]{4, 5, 6, 7, 0, 1, 2}));
+    }
+
+    @Test
+    void numDecodings() {
+        assertEquals(3, instance.numDecodings("226"));
+        assertEquals(1, instance.numDecodings("10"));
+        assertEquals(0, instance.numDecodings("010"));
+        assertEquals(0, instance.numDecodings("10011"));
+    }
+
+    @Test
+    void maximalSquare() {
+        assertEquals(4, instance.maximalSquare(new char[][]{
+                {'0','1','1','0','1'},{'1','1','0','1','0'},{'0','1','1','1','0'},{'1','1','1','1','0'},{'1','1','1','1','1'},{'0','0','0','0','0'}
+        }));
     }
 }
