@@ -1,3 +1,7 @@
+import annotations.level.Easy;
+import annotations.level.Hard;
+import annotations.level.Medium;
+
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -35,6 +39,7 @@ public class Solution extends SolutionBase {
     //给定一个整数数组 nums 和一个目标值 target，请你在该数组中找出和为目标值的那 两个 整数，并返回他们的数组下标。
     //
     //你可以假设每种输入只会对应一个答案。但是，数组中同一个元素不能使用两遍。
+    @Easy
     public int[] twoSum(int[] nums, int target) {
         Map<Integer, Integer> map = new HashMap<>();
         for (int i = 0; i < nums.length; i++) {
@@ -49,6 +54,7 @@ public class Solution extends SolutionBase {
     }
 
     // 三数之和为0
+    @Medium
     public List<List<Integer>> threeSum(int[] nums) {
         int length = nums.length;
         if (length < 3) {
@@ -100,6 +106,7 @@ public class Solution extends SolutionBase {
         return fromArray(result);
     }
 
+    @Medium
     public int lengthOfLongestSubstringLeetCode(String s) {
         // 哈希集合，记录每个字符是否出现过
         Set<Character> occ = new HashSet<>();
@@ -123,6 +130,7 @@ public class Solution extends SolutionBase {
     }
 
     //给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度。
+    @Medium
     public int lengthOfLongestSubstring(String s) {
         Set<Integer> largestNoRepeatCharSet = new HashSet<>();
 
@@ -150,6 +158,7 @@ public class Solution extends SolutionBase {
     //给定两个大小为 m 和 n 的正序（从小到大）数组nums1和nums2。
     //请你找出这两个正序数组的中位数，并且要求算法的时间复杂度为 O(log(m + n))。
     //你可以假设nums1和nums2不会同时为空。
+    @Hard
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
         int[] mergedArray = mergeArray(nums1, nums2);
         if (mergedArray.length % 2 == 0) {
@@ -190,27 +199,24 @@ public class Solution extends SolutionBase {
 
     //给定一个字符串 s，找到 s 中最长的回文子串。你可以假设 s 的最大长度为 1000。
     //dp[m][n] 第m到第n位为回文字符串
+    @Medium
     public String longestPalindrome(String s) {
         String result = "";
         int length = s.length();
         boolean[][] dp = new boolean[length][length];
         int maxLen = 0;
-        for (int distance = 0; distance < length; distance++) {
-            for (int i = 0; i < length - distance; i++) {
-                int j = i + distance;
-                if (i == j) {
-                    dp[i][j] = true;
+        for (int len = 0; len < length; len++) {
+            for (int i = 0; i < length - len; i++) {
+                if (len == 0) {
+                    dp[i][i + len] = true;
+                } else if (len == 1) {
+                    dp[i][i + 1] = s.charAt(i) == s.charAt(i + 1);
                 } else {
-                    boolean b = s.charAt(i) == s.charAt(j);
-                    if (j == i + 1) {
-                        dp[i][j] = b;
-                    } else {
-                        dp[i][j] = dp[i + 1][j - 1] && b;
-                    }
+                    dp[i][i + len] = dp[i + 1][i + len - 1] && s.charAt(i) == s.charAt(i + len);
                 }
-                if (dp[i][j] && j - i + 1 > maxLen) {
-                    result = s.substring(i, j + 1);
-                    maxLen = j - i + 1;
+                if (dp[i][i + len] && len + 1 > maxLen) {
+                    result = s.substring(i, i + len + 1);
+                    maxLen = len + 1;
                 }
             }
         }
@@ -238,6 +244,7 @@ public class Solution extends SolutionBase {
     //E T O E S I I G
     //E   D   H   N
     //之后，你的输出需要从左往右逐行读取，产生出一个新的字符串，比如："LCIRETOESIIGEDHN"。
+    @Medium
     public String convertZ(String s, int numRows) {
         if (numRows == 1 || s.length() < numRows) {
             return s;
@@ -262,7 +269,8 @@ public class Solution extends SolutionBase {
         return result.toString();
     }
 
-    //给出一个 32 位的有符号整数，你需要将这个整数中每位上的数字进行反转。
+    //给出一个 32 位的有符号整数，你需要将这个整数中每位上的数字进行反转。输入：x = -123 输出：-321
+    @Medium
     public int reverse(int x) {
         if (x == 0) {
             return 0;
@@ -294,6 +302,7 @@ public class Solution extends SolutionBase {
     //提示：
     //本题中的空白字符只包括空格字符 ' ' 。
     //假设我们的环境只能存储 32 位大小的有符号整数。如果数值超过这个范围，请返回INT_MAX或INT_MIN。
+    @Medium
     public int myAtoi(String str) {
         int space = 32;
         int positive = 43;
@@ -314,13 +323,12 @@ public class Solution extends SolutionBase {
                 } else {
                     break;
                 }
-            }
-            if (!startCount && aByte != space) {
+            } else if (aByte != space) {
                 startCount = true;
                 if (aByte == negative || aByte == positive) {
                     isNegative = aByte == negative;
                 } else if (isNum(aByte)) {
-                    res = res * 10 + aByte - 48;
+                    res = aByte - 48;
                 } else {
                     return 0;
                 }
@@ -335,6 +343,7 @@ public class Solution extends SolutionBase {
     }
 
     //判断一个整数是否是回文数。回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。
+    @Easy
     public boolean isPalindrome(int x) {
         if (x == 0) {
             return true;
@@ -359,7 +368,8 @@ public class Solution extends SolutionBase {
     //
     //'.' 匹配任意单个字符
     //'*' 匹配零个或多个前面的那一个元素
-    // f(m,n)表示s的前m个字符和前n个字符可以匹配
+    // dp(m,n)表示s的前m个字符和前n个字符可以匹配
+    @Hard
     public boolean isMatch(String s, String p) {
         int m = s.length();
         int n = p.length();
@@ -398,6 +408,7 @@ public class Solution extends SolutionBase {
     // 找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。
     //
     //说明：你不能倾斜容器。
+    @Medium
     public int maxArea(int[] height) {
         int i = 0;
         int j = height.length - 1;
@@ -577,6 +588,7 @@ public class Solution extends SolutionBase {
 
 
     //整数转罗马字符串
+    @Medium
     public String intToRoman(int num) {
         String res = "";
 //                                 1000 500  100  50   10    5    1
@@ -621,6 +633,7 @@ public class Solution extends SolutionBase {
         }
     }
 
+    @Easy
     public int romanToInt(String s) {
 
         int res = 0;
@@ -1298,8 +1311,8 @@ public class Solution extends SolutionBase {
     }
 
     private void dfs2(int[] nums, int len, int depth,
-            Deque<Integer> path, boolean[] used,
-            List<List<Integer>> res) {
+                      Deque<Integer> path, boolean[] used,
+                      List<List<Integer>> res) {
         if (depth == len) {
             res.add(new ArrayList<>(path));
             return;
@@ -1382,9 +1395,11 @@ public class Solution extends SolutionBase {
     }
 
     //编写一个高效的算法来判断 m x n 矩阵中，是否存在一个目标值
+    @Medium
     public boolean searchMatrix(int[][] matrix, int target) {
         int i = matrix[0].length - 1;
         int j = 0;
+        //从右上角开始找，方向确定要么向左要么向下
         while (i >= 0 && j < matrix.length) {
             int delta = matrix[j][i] - target;
             if (delta == 0) {
@@ -2434,6 +2449,7 @@ public class Solution extends SolutionBase {
 //        freqStack.pop();
 //        solution.nearestValidPoint(3, 4, new int[][]{{2, 3}});
 //        int[] ints = solution.productExceptSelfBest(new int[]{1, 2, 3, 4});
+        solution.reverse(-10);
         solution.secondHighest("ck077");
         System.out.println();
 //        int size = 20;
